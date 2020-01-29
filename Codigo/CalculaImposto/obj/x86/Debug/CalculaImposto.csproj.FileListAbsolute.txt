@@ -1,0 +1,8 @@
+D:\Projetos\CalculaImposto\CalculaImposto\bin\Debug\CalculaImposto.exe
+D:\Projetos\CalculaImposto\CalculaImposto\bin\Debug\CalculaImposto.pdb
+D:\Projetos\CalculaImposto\CalculaImposto\obj\x86\Debug\CalculaImposto.FrmCalculaImposto.resources
+D:\Projetos\CalculaImposto\CalculaImposto\obj\x86\Debug\CalculaImposto.Properties.Resources.resources
+D:\Projetos\CalculaImposto\CalculaImposto\obj\x86\Debug\CalculaImposto.csproj.GenerateResource.Cache
+D:\Projetos\CalculaImposto\CalculaImposto\obj\x86\Debug\CalculaImposto.exe
+D:\Projetos\CalculaImposto\CalculaImposto\obj\x86\Debug\CalculaImposto.pdb
+D:\Projetos\CalculaImposto\CalculaImposto\obj\x86\Debug\CalculaImposto.csprojResolveAssemblyReference.cache
