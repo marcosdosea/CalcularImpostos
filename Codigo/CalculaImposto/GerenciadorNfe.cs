@@ -33,6 +33,13 @@ namespace CalculaImposto
             XmlSerializer serializer = new XmlSerializer(typeof(TNfeProc));
             TNfeProc nfe = (TNfeProc)serializer.Deserialize(xmlReaderRetorno);
 
+            String numeroNF = nfe.NFe.infNFe.ide.nNF;
+        //    String fornecedor = nfe.NFe.infNFe.ide.;
+            String dataEmissao = nfe.NFe.infNFe.ide.dhEmi;
+            string ValorProdutos = nfe.NFe.infNFe.ide.verProc;
+            string ValorFrete = nfe.NFe.infNFe.ide.cDV;
+            string ValorTotal = nfe.NFe.infNFe.ide.cDV;
+
             return nfe;
         }
     }
