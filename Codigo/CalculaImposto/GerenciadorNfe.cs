@@ -21,7 +21,7 @@ namespace CalculaImposto
             return gNFe;
         }
 
-        private GerenciadorNfe()
+        public GerenciadorNfe()
         {
         }
 
