@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using System.Security.AccessControl;
-using System.Threading;
+
 
 namespace CalculaImposto
 {
@@ -17,9 +11,7 @@ namespace CalculaImposto
     {
         private string caminho;
 
-        private string pastaTemp = null;
-
-        private DirectoryInfo dirInfo = null;
+        string pastaSaida;
 
         public FrmCalculaImposto()
         {
@@ -50,16 +42,9 @@ namespace CalculaImposto
                 {
                     try
                     {
-                     /*   string user = "barbie-12-girl@hotmail.com"; // Troque X pelo nome de usuário de um administrador.
-                        System.IO.DirectoryInfo folderInfo = new System.IO.DirectoryInfo(caminho);
-                        DirectorySecurity ds = new DirectorySecurity();
 
-                        ds.AddAccessRule(new FileSystemAccessRule(user, FileSystemRights.Modify, AccessControlType.Allow));
-                        ds.SetAccessRuleProtection(false, false);
-                        folderInfo.SetAccessControl(ds);
-                        */
-                        DescompactarZip(caminho);
-                        // notasFiscaisBindingSource.DataSource = new List<NotasFiscais>();
+                        ExtrairZip(caminho);
+                        DirectorioExiste(pastaSaida);
 
                     }
                     catch (Exception ex)
@@ -69,116 +54,23 @@ namespace CalculaImposto
                 }
             }
         }
-
-        private void DescompactarZip(string caminho)
-        {
-            try
-            {
-
-                pastaTemp = Path.GetTempPath();
-
-                /*   if (Directory.Exists(pastaTemp))
-                   {
-                       dirInfo = new DirectoryInfo(pastaTemp);
-                       // Busca automaticamente todos os arquivos em todos os subdiretórios
-                       FileInfo[] Files = dirInfo.GetFiles("*xml", SearchOption.AllDirectories);
-                       foreach (FileInfo File in Files)
-                       {
-                           BuscaArquivos(dirInfo);
-                       }
-                   }
-
-                   else
-                   { */
-                    ZipFile.ExtractToDirectory(caminho, pastaTemp);
-
-              //      dirInfo = new DirectoryInfo(pastaTemp);
-              
-              //      BuscaArquivos(dirInfo);
-               // }
-               }
-            catch (Exception ex)
-            {
-                MessageBox.Show(String.Format("Não foi possível descompactar e abrir os arquivos na pasta temporária. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            } 
-            finally 
-            {
-                 Directory.GetFiles(pastaTemp, "*", SearchOption.AllDirectories);
-                 File.Delete(pastaTemp);
-                 Directory.Delete(pastaTemp, true);
-             //   DeleteDirectory(pastaTemp);
-            }
-
-        }
-        public static void DeleteDirectory(string path)
-        {
-            foreach (string directory in Directory.GetDirectories(path))
-            {
-                Thread.Sleep(1);
-                DeleteDir(directory);
-            }
-            DeleteDir(path);
-        }
-
-        private static void DeleteDir(string dir)
-        {
-            try
-            {
-                Thread.Sleep(1);
-                Directory.Delete(dir, true);
-            }
-            catch (IOException)
-            {
-                DeleteDir(dir);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                DeleteDir(dir);
-            }
-        }
-        private void BuscaArquivos(DirectoryInfo dir)
-        {
-            // lista arquivos do diretorio corrente
-            foreach (FileInfo file in dir.GetFiles("*.xml"))
-            {
-                try
-                {
-                    TNfeProc nfe = new TNfeProc();
-                    GerenciadorNfe gerenciadorNfe = new GerenciadorNfe();
-                    nfe = gerenciadorNfe.LerNFE(file.FullName);
-                    //chama novoObjeto para gerar um novo objeto do tipo Notas Fiscais e exibir na Grid
-                    NotasFiscais novaNota = novoObjeto(nfe);
-                    //    notasFiscaisBindingSource.DataSource = new List<NotasFiscais>();
-                    //   notasFiscaisBindingSource.Add(novaNota);
-
-                    List<NotasFiscais> notaList = new List<NotasFiscais>();
-                    notaList.Add(novaNota);
-
-                    this.notasFiscaisBindingSource.DataSource = notaList;
-
-                    this.dataGridView1.DataSource =
-                        this.notasFiscaisBindingSource;
-
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(String.Format("Não foi possível ler os arquivos na pasta temporária. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
         public NotasFiscais novoObjeto(TNfeProc nfeProc)
         {
             try
             {
                 NotasFiscais notasFiscais = new NotasFiscais();
-                notasFiscais.Numero = nfeProc.NFe.infNFe.ide.cNF;
+                //  notasFiscais.Numero = nfeProc.NFe.infNFe.ide.cNF;
+                notasFiscais.Numero = nfeProc.NFe.infNFe.ide.nNF;
+                //estou pegando a inscrição estadual de quem emite a nota fiscal, é o fornecedor?
+                notasFiscais.Fornecedor = nfeProc.NFe.infNFe.emit.IE;
                 notasFiscais.DataEmissao = nfeProc.NFe.infNFe.ide.dhEmi;
-                decimal converterValorProdutos = Convert.ToDecimal(nfeProc.NFe.infNFe.ide.verProc);
-                decimal converterValorFrete = Convert.ToDecimal(nfeProc.NFe.infNFe.ide.cDV);
-                decimal converterValorTotal = Convert.ToDecimal(nfeProc.NFe.infNFe.ide.cDV);
+                decimal converterValorProdutos = Convert.ToDecimal(nfeProc.NFe.infNFe.total.ICMSTot.vProd);
+                decimal converterValorFrete = Convert.ToDecimal(nfeProc.NFe.infNFe.total.ICMSTot.vFrete);
+                decimal converterValorTotal = Convert.ToDecimal(nfeProc.NFe.infNFe.total.ICMSTot.vNF);
                 notasFiscais.ValorProdutos = converterValorProdutos;
                 notasFiscais.ValorFrete = converterValorFrete;
                 notasFiscais.ValorTotal = converterValorTotal;
+               
                 return notasFiscais;
             }
             catch (Exception ex)
@@ -192,5 +84,117 @@ namespace CalculaImposto
         {
 
         }
+
+        #region Métodos Arquivo
+        public void DirectorioExiste(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                // Processa a lista de arquivos encontrado no directorio.
+                string[] fileEntries = Directory.GetFiles(path);
+                foreach (string fileName in fileEntries) 
+                {
+                    ProcessarArquivo();
+                }
+             //   ProcessarArquivo(fileName);
+            }
+        }
+
+        public void ProcessarArquivo()
+        {
+            //string diretorio;
+            try
+            {
+                string[] arquivos = Directory.GetFiles(pastaSaida, "*.xml");
+                foreach (var file in arquivos)
+                {
+                    TNfeProc nfe = new TNfeProc();
+
+                    GerenciadorNfe gerenciadorNfe = new GerenciadorNfe();
+
+                    nfe = gerenciadorNfe.LerNFE(file);
+
+                    NotasFiscais novaNota = novoObjeto(nfe);
+                
+                    List<NotasFiscais> notaList = new List<NotasFiscais>();
+                    notaList.Add(novaNota);
+
+                    this.notasFiscaisBindingSource.DataSource = notaList;
+
+                    this.dataGridView1.DataSource =
+                        this.notasFiscaisBindingSource;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Não foi possível processar os arquivos do diretorio. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void CriarDirectorio(string path)
+        {
+
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    ApagarDiretorio(path);
+                }
+
+                DirectoryInfo di = Directory.CreateDirectory(path);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Não foi possível criar Diretorio. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void ApagarDiretorio(string path)
+        {
+            try {
+                string[] fileEntries = Directory.GetFiles(path);
+                foreach (string fileName in fileEntries) 
+                {
+                    ApagarArquivo();
+                }          
+                Directory.Delete(path, true);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Não foi possível excluir o diretorio. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ApagarArquivo()
+        {
+            try
+            {
+
+                string[] arquivos = Directory.GetFiles(pastaSaida, "*.xml");
+                foreach (var file in arquivos)
+                {
+                    File.Delete(file);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Não foi possível excluir o arquivo do diretorio. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void ExtrairZip(string pastaZip)
+        {
+            try
+            {
+                pastaSaida = "DiretorioTemporario";
+                CriarDirectorio(pastaSaida);
+                ZipFile.ExtractToDirectory(pastaZip, pastaSaida);
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show(String.Format("Não foi possível extrair os arquivos. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        #endregion
     }
 }

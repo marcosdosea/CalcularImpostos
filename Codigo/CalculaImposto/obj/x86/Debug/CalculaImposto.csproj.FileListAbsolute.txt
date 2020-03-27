@@ -15,3 +15,4 @@ C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debu
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.csproj.GenerateResource.cache
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.exe
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.pdb
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.csproj.CoreCompileInputs.cache
