@@ -90,40 +90,40 @@ namespace CalculaImposto
         {
             if (Directory.Exists(path))
             {
-                // Processa a lista de arquivos encontrado no directorio.
+                // Processa a lista de arquivos encontrado no diretorio.
                 string[] fileEntries = Directory.GetFiles(path);
                 foreach (string fileName in fileEntries) 
                 {
                     ProcessarArquivo();
                 }
-             //   ProcessarArquivo(fileName);
             }
         }
 
         public void ProcessarArquivo()
         {
-            //string diretorio;
             try
             {
                 string[] arquivos = Directory.GetFiles(pastaSaida, "*.xml");
+                TNfeProc nfe;
+                NotasFiscais novaNota;
+                GerenciadorNfe gerenciadorNfe;
+                List<NotasFiscais> notaList = new List<NotasFiscais>();
                 foreach (var file in arquivos)
                 {
-                    TNfeProc nfe = new TNfeProc();
+                    nfe = new TNfeProc();
 
-                    GerenciadorNfe gerenciadorNfe = new GerenciadorNfe();
+                    gerenciadorNfe = new GerenciadorNfe();
 
                     nfe = gerenciadorNfe.LerNFE(file);
-
-                    NotasFiscais novaNota = novoObjeto(nfe);
-                
-                    List<NotasFiscais> notaList = new List<NotasFiscais>();
+                 
+                    novaNota = novoObjeto(nfe);
+                        
                     notaList.Add(novaNota);
-
-                    this.notasFiscaisBindingSource.DataSource = notaList;
-
-                    this.dataGridView1.DataSource =
-                        this.notasFiscaisBindingSource;
                 }
+                this.notasFiscaisBindingSource.DataSource = notaList;
+
+                this.dataGridView1.DataSource =
+                   this.notasFiscaisBindingSource;
             }
             catch (Exception ex)
             {
