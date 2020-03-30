@@ -13,6 +13,8 @@ namespace CalculaImposto
 
         string pastaSaida;
 
+        string subdiretorio;
+
         public FrmCalculaImposto()
         {
             InitializeComponent();
@@ -70,7 +72,7 @@ namespace CalculaImposto
                 notasFiscais.ValorProdutos = converterValorProdutos;
                 notasFiscais.ValorFrete = converterValorFrete;
                 notasFiscais.ValorTotal = converterValorTotal;
-               
+
                 return notasFiscais;
             }
             catch (Exception ex)
@@ -92,7 +94,7 @@ namespace CalculaImposto
             {
                 // Processa a lista de arquivos encontrado no diretorio.
                 string[] fileEntries = Directory.GetFiles(path);
-                foreach (string fileName in fileEntries) 
+                foreach (string fileName in fileEntries)
                 {
                     ProcessarArquivo();
                 }
@@ -115,9 +117,9 @@ namespace CalculaImposto
                     gerenciadorNfe = new GerenciadorNfe();
 
                     nfe = gerenciadorNfe.LerNFE(file);
-                 
+
                     novaNota = novoObjeto(nfe);
-                        
+
                     notaList.Add(novaNota);
                 }
                 this.notasFiscaisBindingSource.DataSource = notaList;
@@ -153,10 +155,10 @@ namespace CalculaImposto
         {
             try {
                 string[] fileEntries = Directory.GetFiles(path);
-                foreach (string fileName in fileEntries) 
+                foreach (string fileName in fileEntries)
                 {
                     ApagarArquivo();
-                }          
+                }
                 Directory.Delete(path, true);
             }
             catch (Exception ex)
@@ -189,12 +191,32 @@ namespace CalculaImposto
                 pastaSaida = "DiretorioTemporario";
                 CriarDirectorio(pastaSaida);
                 ZipFile.ExtractToDirectory(pastaZip, pastaSaida);
+                //checar se existe outra pasta dentro do diretorio extraido
+                bool valor = ChecarSubpasta(pastaSaida);
+                if (valor.Equals(true)) 
+                {
+                    pastaSaida = subdiretorio;
+                }         
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 MessageBox.Show(String.Format("Não foi possível extrair os arquivos. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        #endregion
+
+        private bool ChecarSubpasta(string pasta)
+        {
+            if (Directory.Exists(pasta))
+            {
+                string[] diretorios = Directory.GetDirectories(pastaSaida);
+                foreach (string dir in diretorios)
+                {
+                    subdiretorio = dir;
+                    return true;
+                }
+            }
+            return false;
+        }
+            #endregion   
     }
 }
