@@ -61,9 +61,7 @@ namespace CalculaImposto
             try
             {
                 NotasFiscais notasFiscais = new NotasFiscais();
-                //  notasFiscais.Numero = nfeProc.NFe.infNFe.ide.cNF;
                 notasFiscais.Numero = nfeProc.NFe.infNFe.ide.nNF;
-                //estou pegando a inscrição estadual de quem emite a nota fiscal, é o fornecedor?
                 notasFiscais.Fornecedor = nfeProc.NFe.infNFe.emit.IE;
                 notasFiscais.DataEmissao = nfeProc.NFe.infNFe.ide.dhEmi;
                 decimal converterValorProdutos = Convert.ToDecimal(nfeProc.NFe.infNFe.total.ICMSTot.vProd);
@@ -92,7 +90,6 @@ namespace CalculaImposto
         {
             if (Directory.Exists(path))
             {
-                // Processa a lista de arquivos encontrado no diretorio.
                 string[] fileEntries = Directory.GetFiles(path);
                 foreach (string fileName in fileEntries)
                 {
@@ -153,7 +150,8 @@ namespace CalculaImposto
 
         public void ApagarDiretorio(string path)
         {
-            try {
+            try
+            {
                 string[] fileEntries = Directory.GetFiles(path);
                 foreach (string fileName in fileEntries)
                 {
@@ -193,10 +191,10 @@ namespace CalculaImposto
                 ZipFile.ExtractToDirectory(pastaZip, pastaSaida);
                 //checar se existe outra pasta dentro do diretorio extraido
                 bool valor = ChecarSubpasta(pastaSaida);
-                if (valor.Equals(true)) 
+                if (valor.Equals(true))
                 {
                     pastaSaida = subdiretorio;
-                }         
+                }
             }
             catch (Exception ex)
             {
@@ -217,6 +215,6 @@ namespace CalculaImposto
             }
             return false;
         }
-            #endregion   
+        #endregion
     }
 }
