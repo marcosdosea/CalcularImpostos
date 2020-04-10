@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace CalculaImposto
+﻿namespace CalculaImposto
 {
     public class ExtratoImposto
     {
@@ -13,6 +8,6 @@ namespace CalculaImposto
         public decimal ValorRecolher { get; set; }
         public decimal ValorAnalisado { get; set; }
         public string FormaRecolhimento { get; set; }
-        public decimal diferenca { get; set; }
+        public decimal Diferenca { get; set; }
     }
 }

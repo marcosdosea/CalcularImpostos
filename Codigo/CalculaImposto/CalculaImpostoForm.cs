@@ -56,7 +56,7 @@ namespace CalculaImposto
                 }
             }
         }
-        public NotasFiscais novoObjeto(TNfeProc nfeProc)
+        public NotasFiscais NovoObjeto(TNfeProc nfeProc)
         {
             try
             {
@@ -80,12 +80,16 @@ namespace CalculaImposto
             }
         }
 
-        private void notasFiscaisBindingSource_CurrentChanged(object sender, EventArgs e)
+        private void NotasFiscaisBindingSource_CurrentChanged(object sender, EventArgs e)
         {
 
         }
 
         #region Métodos Arquivo
+        /// <summary>
+        /// Verifica se o diretorio existe. Em caso afirmativo, começa a leitura dos arquivos existentes dentro dele, chamando o outro método ProcessarArquivo()
+        /// </summary>
+        /// <param name="path">Passa o caminho da pasta a ser verificada</param>
         public void DirectorioExiste(string path)
         {
             if (Directory.Exists(path))
@@ -115,7 +119,7 @@ namespace CalculaImposto
 
                     nfe = gerenciadorNfe.LerNFE(file);
 
-                    novaNota = novoObjeto(nfe);
+                    novaNota = NovoObjeto(nfe);
 
                     notaList.Add(novaNota);
                 }

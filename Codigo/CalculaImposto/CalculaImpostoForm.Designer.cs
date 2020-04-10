@@ -170,7 +170,7 @@
             // notasFiscaisBindingSource
             // 
             this.notasFiscaisBindingSource.DataSource = typeof(CalculaImposto.NotasFiscais);
-            this.notasFiscaisBindingSource.CurrentChanged += new System.EventHandler(this.notasFiscaisBindingSource_CurrentChanged);
+            this.notasFiscaisBindingSource.CurrentChanged += new System.EventHandler(this.NotasFiscaisBindingSource_CurrentChanged);
             // 
             // btnBuscarNfe
             // 
