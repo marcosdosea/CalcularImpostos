@@ -31,7 +31,7 @@ namespace CalculaImposto
         private void BtnBuscarNfe_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Arquivo zip | *.zip";
+            openFileDialog.Filter = "Arquivos | *.zip;*.xml";
             openFileDialog.DefaultExt = "zip";
             openFileDialog.RestoreDirectory = true;
 
@@ -42,16 +42,23 @@ namespace CalculaImposto
 
                 if (string.IsNullOrEmpty(openFileDialog.FileName) == false)
                 {
-                    try
+                    if (caminho.EndsWith(".zip"))
                     {
+                        try
+                        {
 
-                        ExtrairZip(caminho);
-                        DirectorioExiste(pastaSaida);
+                            ExtrairZip(caminho);
+                            DirectorioExiste(pastaSaida);
 
-                    }
-                    catch (Exception ex)
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(String.Format("Não foi possível abrir o arquivo. Excecão OpenFileDialog. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    } else
                     {
-                        MessageBox.Show(String.Format("Não foi possível abrir o arquivo. Excecão OpenFileDialog. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        //pastaSaida = caminho;
+                        ProcessarArquivo();
                     }
                 }
             }
@@ -87,7 +94,7 @@ namespace CalculaImposto
 
         #region Métodos Arquivo
         /// <summary>
-        /// Verifica se o diretorio existe. Em caso afirmativo, começa a leitura dos arquivos existentes dentro dele, chamando o outro método ProcessarArquivo()
+        /// Verifica se o diretorio existe. Em caso afirmativo, começa a leitura dos arquivos existentes dentro dele, chamando o outro método ProcessarArquivos()
         /// </summary>
         /// <param name="path">Passa o caminho da pasta a ser verificada</param>
         public void DirectorioExiste(string path)
@@ -97,12 +104,12 @@ namespace CalculaImposto
                 string[] fileEntries = Directory.GetFiles(path);
                 foreach (string fileName in fileEntries)
                 {
-                    ProcessarArquivo();
+                    ProcessarArquivos();
                 }
             }
         }
 
-        public void ProcessarArquivo()
+        public void ProcessarArquivos()
         {
             try
             {
@@ -131,6 +138,34 @@ namespace CalculaImposto
             catch (Exception ex)
             {
                 MessageBox.Show(String.Format("Não foi possível processar os arquivos do diretorio. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void ProcessarArquivo()
+        {
+            try
+            {
+                string arquivo = Path.GetFullPath(caminho);
+                TNfeProc nfe;
+                NotasFiscais novaNota;
+                GerenciadorNfe gerenciadorNfe;
+             
+                nfe = new TNfeProc();
+
+                gerenciadorNfe = new GerenciadorNfe();
+
+                nfe = gerenciadorNfe.LerNFE(arquivo);
+
+                novaNota = NovoObjeto(nfe);
+
+                this.notasFiscaisBindingSource.DataSource = novaNota;
+
+                this.dataGridView1.DataSource =
+                   this.notasFiscaisBindingSource;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Não foi possível processar o arquivo. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
