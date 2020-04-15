@@ -96,16 +96,12 @@ namespace CalculaImposto
         /// <summary>
         /// Verifica se o diretorio existe. Em caso afirmativo, começa a leitura dos arquivos existentes dentro dele, chamando o outro método ProcessarArquivos()
         /// </summary>
-        /// <param name="path">Passa o caminho da pasta a ser verificada</param>
-        public void DirectorioExiste(string path)
+        /// <param name="pasta">Passa o caminho da pasta a ser verificada</param>
+        public void DirectorioExiste(string pasta)
         {
-            if (Directory.Exists(path))
+            if (Directory.Exists(pasta))
             {
-                string[] fileEntries = Directory.GetFiles(path);
-                foreach (string fileName in fileEntries)
-                {
                     ProcessarArquivos();
-                }
             }
         }
 
