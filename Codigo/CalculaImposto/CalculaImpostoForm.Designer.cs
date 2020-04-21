@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -49,6 +49,12 @@
             this.textBoxFile = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.openFileDialogNfe = new System.Windows.Forms.OpenFileDialog();
+            this.ValorFrete = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.numeroDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.fornecedorDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataEmissaoDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.valorProdutosDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.valorTotalDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.notasFiscaisBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.nCMDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tipoReceitaDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -63,12 +69,6 @@
             this.valorAnalisadoDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.formaRecolhimentoDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.extratoImpostoBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.numeroDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.fornecedorDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataEmissaoDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ValorFrete = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.valorProdutosDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.valorTotalDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -261,6 +261,57 @@
             // 
             this.openFileDialogNfe.FileName = "openFileDialog";
             // 
+            // ValorFrete
+            // 
+            this.ValorFrete.DataPropertyName = "ValorFrete";
+            dataGridViewCellStyle2.NullValue = null;
+            this.ValorFrete.DefaultCellStyle = dataGridViewCellStyle2;
+            this.ValorFrete.HeaderText = "ValorFrete";
+            this.ValorFrete.Name = "ValorFrete";
+            this.ValorFrete.ReadOnly = true;
+            // 
+            // numeroDataGridViewTextBoxColumn
+            // 
+            this.numeroDataGridViewTextBoxColumn.DataPropertyName = "Numero";
+            this.numeroDataGridViewTextBoxColumn.HeaderText = "Numero";
+            this.numeroDataGridViewTextBoxColumn.Name = "numeroDataGridViewTextBoxColumn";
+            this.numeroDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // fornecedorDataGridViewTextBoxColumn
+            // 
+            this.fornecedorDataGridViewTextBoxColumn.DataPropertyName = "Fornecedor";
+            this.fornecedorDataGridViewTextBoxColumn.HeaderText = "Fornecedor";
+            this.fornecedorDataGridViewTextBoxColumn.Name = "fornecedorDataGridViewTextBoxColumn";
+            this.fornecedorDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // dataEmissaoDataGridViewTextBoxColumn
+            // 
+            this.dataEmissaoDataGridViewTextBoxColumn.DataPropertyName = "DataEmissao";
+            dataGridViewCellStyle1.Format = "G";
+            dataGridViewCellStyle1.NullValue = null;
+            this.dataEmissaoDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle1;
+            this.dataEmissaoDataGridViewTextBoxColumn.HeaderText = "DataEmissao";
+            this.dataEmissaoDataGridViewTextBoxColumn.Name = "dataEmissaoDataGridViewTextBoxColumn";
+            this.dataEmissaoDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // valorProdutosDataGridViewTextBoxColumn
+            // 
+            this.valorProdutosDataGridViewTextBoxColumn.DataPropertyName = "ValorProdutos";
+            dataGridViewCellStyle3.NullValue = null;
+            this.valorProdutosDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle3;
+            this.valorProdutosDataGridViewTextBoxColumn.HeaderText = "ValorProdutos";
+            this.valorProdutosDataGridViewTextBoxColumn.Name = "valorProdutosDataGridViewTextBoxColumn";
+            this.valorProdutosDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // valorTotalDataGridViewTextBoxColumn
+            // 
+            this.valorTotalDataGridViewTextBoxColumn.DataPropertyName = "ValorTotal";
+            dataGridViewCellStyle4.NullValue = null;
+            this.valorTotalDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle4;
+            this.valorTotalDataGridViewTextBoxColumn.HeaderText = "ValorTotal";
+            this.valorTotalDataGridViewTextBoxColumn.Name = "valorTotalDataGridViewTextBoxColumn";
+            this.valorTotalDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
             // notasFiscaisBindingSource
             // 
             this.notasFiscaisBindingSource.DataSource = typeof(CalculaImposto.NotasFiscais);
@@ -339,60 +390,6 @@
             // extratoImpostoBindingSource
             // 
             this.extratoImpostoBindingSource.DataSource = typeof(CalculaImposto.ExtratoImposto);
-            // 
-            // numeroDataGridViewTextBoxColumn
-            // 
-            this.numeroDataGridViewTextBoxColumn.DataPropertyName = "Numero";
-            this.numeroDataGridViewTextBoxColumn.HeaderText = "Numero";
-            this.numeroDataGridViewTextBoxColumn.Name = "numeroDataGridViewTextBoxColumn";
-            this.numeroDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // fornecedorDataGridViewTextBoxColumn
-            // 
-            this.fornecedorDataGridViewTextBoxColumn.DataPropertyName = "Fornecedor";
-            this.fornecedorDataGridViewTextBoxColumn.HeaderText = "Fornecedor";
-            this.fornecedorDataGridViewTextBoxColumn.Name = "fornecedorDataGridViewTextBoxColumn";
-            this.fornecedorDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // dataEmissaoDataGridViewTextBoxColumn
-            // 
-            this.dataEmissaoDataGridViewTextBoxColumn.DataPropertyName = "DataEmissao";
-            dataGridViewCellStyle1.Format = "G";
-            dataGridViewCellStyle1.NullValue = null;
-            this.dataEmissaoDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle1;
-            this.dataEmissaoDataGridViewTextBoxColumn.HeaderText = "DataEmissao";
-            this.dataEmissaoDataGridViewTextBoxColumn.Name = "dataEmissaoDataGridViewTextBoxColumn";
-            this.dataEmissaoDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // ValorFrete
-            // 
-            this.ValorFrete.DataPropertyName = "ValorFrete";
-            dataGridViewCellStyle2.Format = "C0";
-            dataGridViewCellStyle2.NullValue = null;
-            this.ValorFrete.DefaultCellStyle = dataGridViewCellStyle2;
-            this.ValorFrete.HeaderText = "ValorFrete";
-            this.ValorFrete.Name = "ValorFrete";
-            this.ValorFrete.ReadOnly = true;
-            // 
-            // valorProdutosDataGridViewTextBoxColumn
-            // 
-            this.valorProdutosDataGridViewTextBoxColumn.DataPropertyName = "ValorProdutos";
-            dataGridViewCellStyle3.Format = "C0";
-            dataGridViewCellStyle3.NullValue = null;
-            this.valorProdutosDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle3;
-            this.valorProdutosDataGridViewTextBoxColumn.HeaderText = "ValorProdutos";
-            this.valorProdutosDataGridViewTextBoxColumn.Name = "valorProdutosDataGridViewTextBoxColumn";
-            this.valorProdutosDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // valorTotalDataGridViewTextBoxColumn
-            // 
-            this.valorTotalDataGridViewTextBoxColumn.DataPropertyName = "ValorTotal";
-            dataGridViewCellStyle4.Format = "C0";
-            dataGridViewCellStyle4.NullValue = null;
-            this.valorTotalDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle4;
-            this.valorTotalDataGridViewTextBoxColumn.HeaderText = "ValorTotal";
-            this.valorTotalDataGridViewTextBoxColumn.Name = "valorTotalDataGridViewTextBoxColumn";
-            this.valorTotalDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // FrmCalculaImposto
             // 

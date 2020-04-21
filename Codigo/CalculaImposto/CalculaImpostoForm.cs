@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.IO.Compression;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 
@@ -78,13 +76,16 @@ namespace CalculaImposto
                 string strDate = converterData.ToString("dd/MM/yyyy");
                 notasFiscais.DataEmissao = strDate;
 
-                decimal converterValorProdutos = Convert.ToDecimal(nfeProc.NFe.infNFe.total.ICMSTot.vProd);
-                decimal converterValorFrete = Convert.ToDecimal(nfeProc.NFe.infNFe.total.ICMSTot.vFrete);
-                decimal converterValorTotal = Convert.ToDecimal(nfeProc.NFe.infNFe.total.ICMSTot.vNF);
+                string valorProdutos = nfeProc.NFe.infNFe.total.ICMSTot.vProd;
+                var vp = valorProdutos.Replace('.', ',');
+                string valorFrete = nfeProc.NFe.infNFe.total.ICMSTot.vFrete;
+                var vf = valorFrete.Replace('.', ',');
+                string valorTotal = nfeProc.NFe.infNFe.total.ICMSTot.vNF;
+                var vt = valorTotal.Replace('.', ',');
 
-                notasFiscais.ValorProdutos = converterValorProdutos;
-                notasFiscais.ValorFrete = converterValorFrete;
-                notasFiscais.ValorTotal = converterValorTotal;
+                notasFiscais.ValorProdutos = Math.Round(Convert.ToDecimal(vp),2);
+                notasFiscais.ValorFrete = Math.Round(Convert.ToDecimal(vf),2);
+                notasFiscais.ValorTotal = Math.Round(Convert.ToDecimal(vt),2);
 
                 return notasFiscais;
             }
@@ -139,10 +140,7 @@ namespace CalculaImposto
 
                 this.dataGridView1.DataSource =
                    this.notasFiscaisBindingSource;
-             //   this.dataGridView1.Columns["ValorFrete"].DefaultCellStyle.Format = "0:C2";
-             //   this.dataGridView1.Columns["ValorProdutos"].DefaultCellStyle.Format = "0:C2";
-             //   this.dataGridView1.Columns["ValorTotal"].DefaultCellStyle.Format = "0:C2";
-              //   this.dataGridView1.Columns["DataEmissao"].DefaultCellStyle.Format = "dd/MM/yy";
+               
             }
             catch (Exception ex)
             {
