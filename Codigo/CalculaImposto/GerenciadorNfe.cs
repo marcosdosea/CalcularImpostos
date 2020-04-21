@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml;
+﻿using System.Xml;
 using System.Xml.Serialization;
 
 namespace CalculaImposto
@@ -21,7 +17,7 @@ namespace CalculaImposto
             return gNFe;
         }
 
-        private GerenciadorNfe()
+        public GerenciadorNfe()
         {
         }
 
@@ -32,7 +28,7 @@ namespace CalculaImposto
             XmlNodeReader xmlReaderRetorno = new XmlNodeReader(xmldocRetorno.DocumentElement);
             XmlSerializer serializer = new XmlSerializer(typeof(TNfeProc));
             TNfeProc nfe = (TNfeProc)serializer.Deserialize(xmlReaderRetorno);
-
+           
             return nfe;
         }
     }

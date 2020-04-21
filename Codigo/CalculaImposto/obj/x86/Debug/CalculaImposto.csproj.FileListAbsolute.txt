@@ -6,3 +6,13 @@ D:\Projetos\CalculaImposto\CalculaImposto\obj\x86\Debug\CalculaImposto.csproj.Ge
 D:\Projetos\CalculaImposto\CalculaImposto\obj\x86\Debug\CalculaImposto.exe
 D:\Projetos\CalculaImposto\CalculaImposto\obj\x86\Debug\CalculaImposto.pdb
 D:\Projetos\CalculaImposto\CalculaImposto\obj\x86\Debug\CalculaImposto.csprojResolveAssemblyReference.cache
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\CalculaImposto.exe.config
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\CalculaImposto.exe
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\CalculaImposto.pdb
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.csprojAssemblyReference.cache
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.FrmCalculaImposto.resources
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.Properties.Resources.resources
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.csproj.GenerateResource.cache
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.exe
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.pdb
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.csproj.CoreCompileInputs.cache
