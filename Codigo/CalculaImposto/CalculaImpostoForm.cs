@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 
@@ -70,10 +72,16 @@ namespace CalculaImposto
                 NotasFiscais notasFiscais = new NotasFiscais();
                 notasFiscais.Numero = nfeProc.NFe.infNFe.ide.nNF;
                 notasFiscais.Fornecedor = nfeProc.NFe.infNFe.emit.IE;
+
                 notasFiscais.DataEmissao = nfeProc.NFe.infNFe.ide.dhEmi;
+                DateTime converterData = Convert.ToDateTime(notasFiscais.DataEmissao);
+                string strDate = converterData.ToString("dd/MM/yyyy");
+                notasFiscais.DataEmissao = strDate;
+
                 decimal converterValorProdutos = Convert.ToDecimal(nfeProc.NFe.infNFe.total.ICMSTot.vProd);
                 decimal converterValorFrete = Convert.ToDecimal(nfeProc.NFe.infNFe.total.ICMSTot.vFrete);
                 decimal converterValorTotal = Convert.ToDecimal(nfeProc.NFe.infNFe.total.ICMSTot.vNF);
+
                 notasFiscais.ValorProdutos = converterValorProdutos;
                 notasFiscais.ValorFrete = converterValorFrete;
                 notasFiscais.ValorTotal = converterValorTotal;
@@ -126,10 +134,15 @@ namespace CalculaImposto
 
                     notaList.Add(novaNota);
                 }
+
                 this.notasFiscaisBindingSource.DataSource = notaList;
 
                 this.dataGridView1.DataSource =
                    this.notasFiscaisBindingSource;
+             //   this.dataGridView1.Columns["ValorFrete"].DefaultCellStyle.Format = "0:C2";
+             //   this.dataGridView1.Columns["ValorProdutos"].DefaultCellStyle.Format = "0:C2";
+             //   this.dataGridView1.Columns["ValorTotal"].DefaultCellStyle.Format = "0:C2";
+              //   this.dataGridView1.Columns["DataEmissao"].DefaultCellStyle.Format = "dd/MM/yy";
             }
             catch (Exception ex)
             {
@@ -251,5 +264,7 @@ namespace CalculaImposto
             return false;
         }
         #endregion
+
+       
     }
 }
