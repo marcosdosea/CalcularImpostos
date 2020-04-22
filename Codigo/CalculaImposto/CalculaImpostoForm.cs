@@ -68,7 +68,8 @@ namespace CalculaImposto
             try
             {
                 NotasFiscais notasFiscais = new NotasFiscais();
-                notasFiscais.Numero = nfeProc.NFe.infNFe.ide.nNF;
+                notasFiscais.Numero = nfeProc.NFe.infNFe.Id;
+                // notasFiscais.Numero = nfeProc.NFe.infNFe.ide.nNF;
                 notasFiscais.Fornecedor = nfeProc.NFe.infNFe.emit.IE;
 
                 notasFiscais.DataEmissao = nfeProc.NFe.infNFe.ide.dhEmi;
@@ -83,9 +84,9 @@ namespace CalculaImposto
                 string valorTotal = nfeProc.NFe.infNFe.total.ICMSTot.vNF;
                 var vt = valorTotal.Replace('.', ',');
 
-                notasFiscais.ValorProdutos = Math.Round(Convert.ToDecimal(vp),2);
-                notasFiscais.ValorFrete = Math.Round(Convert.ToDecimal(vf),2);
-                notasFiscais.ValorTotal = Math.Round(Convert.ToDecimal(vt),2);
+                notasFiscais.ValorProdutos = Math.Round(Convert.ToDecimal(vp), 2);
+                notasFiscais.ValorFrete = Math.Round(Convert.ToDecimal(vf), 2);
+                notasFiscais.ValorTotal = Math.Round(Convert.ToDecimal(vt), 2);
 
                 return notasFiscais;
             }
@@ -110,7 +111,7 @@ namespace CalculaImposto
         {
             if (Directory.Exists(pasta))
             {
-                    ProcessarArquivos();
+                ProcessarArquivos();
             }
         }
 
@@ -140,7 +141,7 @@ namespace CalculaImposto
 
                 this.dataGridView1.DataSource =
                    this.notasFiscaisBindingSource;
-               
+
             }
             catch (Exception ex)
             {
@@ -156,7 +157,7 @@ namespace CalculaImposto
                 TNfeProc nfe;
                 NotasFiscais novaNota;
                 GerenciadorNfe gerenciadorNfe;
-             
+
                 nfe = new TNfeProc();
 
                 gerenciadorNfe = new GerenciadorNfe();
@@ -261,8 +262,44 @@ namespace CalculaImposto
             }
             return false;
         }
+
         #endregion
 
-       
+        #region Tarefa 2 - Segunda Grid
+        public Imposto ImpostoNotaFiscal(TNfeProc nfeProc)
+        {
+            try
+            {
+                Imposto imposto = new Imposto();
+                // notasFiscais.Numero = nfeProc.NFe.infNFe.ide.nNF;
+                //    notasFiscais.Fornecedor = nfeProc.NFe.infNFe.emit.IE;
+
+                imposto.NCM = nfeProc.NFe.infNFe.Id;
+
+                /*  notasFiscais.DataEmissao = nfeProc.NFe.infNFe.ide.dhEmi;
+                  DateTime converterData = Convert.ToDateTime(notasFiscais.DataEmissao);
+                  string strDate = converterData.ToString("dd/MM/yyyy");
+                  notasFiscais.DataEmissao = strDate;
+
+                  string valorProdutos = nfeProc.NFe.infNFe.total.ICMSTot.vProd;
+                  var vp = valorProdutos.Replace('.', ',');
+                  string valorFrete = nfeProc.NFe.infNFe.total.ICMSTot.vFrete;
+                  var vf = valorFrete.Replace('.', ',');
+                  string valorTotal = nfeProc.NFe.infNFe.total.ICMSTot.vNF;
+                  var vt = valorTotal.Replace('.', ',');
+
+                  notasFiscais.ValorProdutos = Math.Round(Convert.ToDecimal(vp), 2);
+                  notasFiscais.ValorFrete = Math.Round(Convert.ToDecimal(vf), 2);
+                  notasFiscais.ValorTotal = Math.Round(Convert.ToDecimal(vt), 2);*/
+
+                return imposto;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Não foi possível criar o objeto Imposto. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+        #endregion
     }
-}
+    }
