@@ -33,6 +33,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
@@ -361,7 +362,7 @@
             // 
             // NumeroNotaFiscal
             // 
-            this.NumeroNotaFiscal.DataPropertyName = "NCM";
+            this.NumeroNotaFiscal.DataPropertyName = "Numero";
             this.NumeroNotaFiscal.HeaderText = "Número NotaFiscal";
             this.NumeroNotaFiscal.Name = "NumeroNotaFiscal";
             // 
@@ -397,7 +398,10 @@
             // 
             // DataAtualizacaoMVA
             // 
-            this.DataAtualizacaoMVA.DataPropertyName = "NCM";
+            this.DataAtualizacaoMVA.DataPropertyName = "DataAtualizacaoMVA";
+            dataGridViewCellStyle5.Format = "d";
+            dataGridViewCellStyle5.NullValue = null;
+            this.DataAtualizacaoMVA.DefaultCellStyle = dataGridViewCellStyle5;
             this.DataAtualizacaoMVA.HeaderText = "Data AtualizacaoMVA";
             this.DataAtualizacaoMVA.Name = "DataAtualizacaoMVA";
             // 

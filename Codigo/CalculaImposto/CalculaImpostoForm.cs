@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Windows.Forms;
-
+using System.Xml;
 
 namespace CalculaImposto
 {
@@ -55,9 +55,10 @@ namespace CalculaImposto
                         {
                             MessageBox.Show(String.Format("Não foi possível abrir o arquivo. Excecão OpenFileDialog. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
-                    } else
+                    }
+                    else
                     {
-                        //pastaSaida = caminho;
+                        //passei a pasta caminho;
                         ProcessarArquivo();
                     }
                 }
@@ -68,7 +69,7 @@ namespace CalculaImposto
             try
             {
                 NotasFiscais notasFiscais = new NotasFiscais();
-                notasFiscais.Numero = nfeProc.NFe.infNFe.Id;
+                notasFiscais.Numero = nfeProc.NFe.infNFe.ide.nNF;
                 // notasFiscais.Numero = nfeProc.NFe.infNFe.ide.nNF;
                 notasFiscais.Fornecedor = nfeProc.NFe.infNFe.emit.IE;
 
@@ -122,8 +123,13 @@ namespace CalculaImposto
                 string[] arquivos = Directory.GetFiles(pastaSaida, "*.xml");
                 TNfeProc nfe;
                 NotasFiscais novaNota;
+                Imposto imposto;
                 GerenciadorNfe gerenciadorNfe;
                 List<NotasFiscais> notaList = new List<NotasFiscais>();
+                List<Imposto> impostoList = new List<Imposto>();
+                int quantidadeProdutosNotaF;
+                string arquivo;
+
                 foreach (var file in arquivos)
                 {
                     nfe = new TNfeProc();
@@ -135,12 +141,29 @@ namespace CalculaImposto
                     novaNota = NovoObjeto(nfe);
 
                     notaList.Add(novaNota);
+
+                    int pos = 0;
+                    
+                    arquivo = Path.GetFullPath(file);
+
+                    quantidadeProdutosNotaF = ContaItensNotaFiscal(arquivo); 
+
+                    for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
+                    {
+                        imposto = ImpostoNotaFiscal(pos, nfe);
+                        impostoList.Add(imposto);
+                        pos++;
+                    }
                 }
 
                 this.notasFiscaisBindingSource.DataSource = notaList;
 
                 this.dataGridView1.DataSource =
                    this.notasFiscaisBindingSource;
+
+                this.impostoBindingSource.DataSource = impostoList;
+                this.dataGridView2.DataSource =
+                    this.impostoBindingSource.DataSource;
 
             }
             catch (Exception ex)
@@ -156,6 +179,10 @@ namespace CalculaImposto
                 string arquivo = Path.GetFullPath(caminho);
                 TNfeProc nfe;
                 NotasFiscais novaNota;
+                Imposto imposto;
+                int quantidadeProdutosNotaF = ContaItensNotaFiscal(caminho);
+                int pos = 0;
+                List<Imposto> impostoList = new List<Imposto>();
                 GerenciadorNfe gerenciadorNfe;
 
                 nfe = new TNfeProc();
@@ -166,10 +193,21 @@ namespace CalculaImposto
 
                 novaNota = NovoObjeto(nfe);
 
+                for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
+                {
+                    imposto = ImpostoNotaFiscal(pos, nfe);
+                    impostoList.Add(imposto);
+                    pos++;
+                }
+
                 this.notasFiscaisBindingSource.DataSource = novaNota;
 
                 this.dataGridView1.DataSource =
                    this.notasFiscaisBindingSource;
+
+                this.impostoBindingSource.DataSource = impostoList;
+                this.dataGridView2.DataSource =
+                    this.impostoBindingSource.DataSource;
             }
             catch (Exception ex)
             {
@@ -266,32 +304,46 @@ namespace CalculaImposto
         #endregion
 
         #region Tarefa 2 - Segunda Grid
-        public Imposto ImpostoNotaFiscal(TNfeProc nfeProc)
+
+        public int ContaItensNotaFiscal(string pasta)
         {
             try
             {
+                XmlDocument arquivo = new XmlDocument();
+                arquivo.Load(pasta);
+                var totalItens = arquivo.GetElementsByTagName("prod");
+                int itensNF = 0;
+                foreach (XmlElement nodo in totalItens)
+                {
+                    itensNF++;
+                }
+                return itensNF;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Não foi possível contar os produtos da nota fiscal. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return 0;
+            }
+        }
+        public Imposto ImpostoNotaFiscal(int pos, TNfeProc nfeProc)
+        {
+            try
+            {
+
                 Imposto imposto = new Imposto();
-                // notasFiscais.Numero = nfeProc.NFe.infNFe.ide.nNF;
-                //    notasFiscais.Fornecedor = nfeProc.NFe.infNFe.emit.IE;
 
-                imposto.NCM = nfeProc.NFe.infNFe.Id;
+                imposto.Numero = nfeProc.NFe.infNFe.ide.nNF;
 
-                /*  notasFiscais.DataEmissao = nfeProc.NFe.infNFe.ide.dhEmi;
-                  DateTime converterData = Convert.ToDateTime(notasFiscais.DataEmissao);
-                  string strDate = converterData.ToString("dd/MM/yyyy");
-                  notasFiscais.DataEmissao = strDate;
+                imposto.NCM = nfeProc.NFe.infNFe.det[pos].prod.NCM;
+                // imposto.Produto = nfeProc.NFe.infNFe.det[1].prod.cProd; ->código do produto
+                imposto.Produto = nfeProc.NFe.infNFe.det[pos].prod.xProd; //peguei o nome
+                imposto.TipoReceita = nfeProc.NFe.infNFe.ide.natOp; //natureza operação?
 
-                  string valorProdutos = nfeProc.NFe.infNFe.total.ICMSTot.vProd;
-                  var vp = valorProdutos.Replace('.', ',');
-                  string valorFrete = nfeProc.NFe.infNFe.total.ICMSTot.vFrete;
-                  var vf = valorFrete.Replace('.', ',');
-                  string valorTotal = nfeProc.NFe.infNFe.total.ICMSTot.vNF;
-                  var vt = valorTotal.Replace('.', ',');
-
-                  notasFiscais.ValorProdutos = Math.Round(Convert.ToDecimal(vp), 2);
-                  notasFiscais.ValorFrete = Math.Round(Convert.ToDecimal(vf), 2);
-                  notasFiscais.ValorTotal = Math.Round(Convert.ToDecimal(vt), 2);*/
-
+                //   imposto.AliquotaOrigem = Convert.ToDecimal(nfeProc.NFe.infNFe.det[1].imposto.PISST.vPIS);
+                //    imposto.AliquotaOrigem = Convert.ToDecimal(nfeProc.NFe.infNFe.det[1].imposto.COFINSST.vCOFINS);
+                //   imposto.AliquotaOrigem = Convert.ToDecimal(nfeProc.NFe.infNFe.det[1].imposto.ICMSUFDest.vICMSUFDest);
+                //  imposto.AliquotaOrigem = Convert.ToDecimal(nfeProc.NFe.infNFe.det[1].imposto.ICMSUFDest.vICMSUFRemet);
+             
                 return imposto;
             }
             catch (Exception ex)
@@ -302,4 +354,4 @@ namespace CalculaImposto
         }
         #endregion
     }
-    }
+}
