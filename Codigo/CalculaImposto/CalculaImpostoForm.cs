@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace CalculaImposto
 {
@@ -143,10 +145,10 @@ namespace CalculaImposto
                     notaList.Add(novaNota);
 
                     int pos = 0;
-                    
+
                     arquivo = Path.GetFullPath(file);
 
-                    quantidadeProdutosNotaF = ContaItensNotaFiscal(arquivo); 
+                    quantidadeProdutosNotaF = ContaItensNotaFiscal(arquivo);
 
                     for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
                     {
@@ -334,52 +336,20 @@ namespace CalculaImposto
         {
             try
             {
-                //tentando pegar o ICMS DA NOTA FISCAL
-                XmlDocument arquivo = new XmlDocument();
-                arquivo.Load(pasta);
-                // var totalItens = arquivo.GetElementsByTagName("ICMS");
-                // var icms = arquivo.GetElementsByTagName("orig");
-                // int itensNF = ContaItensNotaFiscal(pasta);
-                // nfeProc.NFe.infNFe.det[pos].imposto
-
-                //lista de det produtos item é a posicao 
-                XmlNode nodeListDet = arquivo.SelectNodes("//nfeProc//Nfe//infNFe//det").Item(pos);
-
-                //  XmlNodeList nodeListImposto = arquivo.SelectNodes("//nfeProc//Nfe//infNFe//det//imposto//icms//icms10");
-                //  XmlNode nodeListTipo = arquivo.SelectNodes("//nfeProc//Nfe//infNFe//det[pos]//imposto//icms//icms10").Item(itensNF);
-                XmlNodeList nodeListICMS = arquivo.SelectNodes("//nfeProc//Nfe//infNFe//det//imposto//icms//icms10");
-
-              //  String numeroItem = nodeListDet.Attributes["nItem"].Value;
-               // string origem = nodeListICMS.Attributes["orig"].Value;
-                // string nameTipo = nodeListTipo.Attributes["name"].Value;
-                //   int itensNF = 0;
-                string origemICMS = "";
-
-                XmlNodeList oNoLista = default(XmlNodeList);
-                oNoLista = arquivo.SelectNodes("//nfeProc//Nfe//infNFe//det//imposto//icms//icms10");
-
-
-                string icms = arquivo.SelectSingleNode("icms10").ChildNodes[pos].InnerText;
-                /*   foreach (XmlElement nodo in totalItens)
-                   {
-                       itensNF++;
-                       origem = "";
-                   }*/
-                /*  foreach (XmlNode node in nodeListICMS)
-                  {
-                     // string teste2 = node.SelectSingleNode("icms10").InnerText;
-                      origemICMS = node.Attributes["orig"].Value;
-                  }*/
-                foreach (XmlNode oNo in oNoLista)
+                XmlDocument doc = new XmlDocument();
+                doc.Load(pasta);
+                //string origem = "";
+                XmlNodeList elemList = doc.GetElementsByTagName("ICMS10");
+                // var orig=elemList[pos];
+                var recuperaItem = elemList.Item(pos);
+                foreach (XmlNode node in elemList)
                 {
-                   // lstXML.Items.Add(oNo.Attributes.GetNamedItem("tipo").Value);
-                    lstXML.Items.Add(oNo.ChildNodes.Item(0).InnerText);
-                    lstXML.Items.Add(oNo.ChildNodes.Item(1).InnerText);
-                    lstXML.Items.Add(oNo.ChildNodes.Item(2).InnerText);
-                    lstXML.Items.Add(oNo.ChildNodes.Item(3).InnerText);
-                    lstXML.Items.Add(oNo.ChildNodes.Item(4).InnerText);
+                    XmlNodeList ali = doc.GetElementsByTagName("orig");
+                    recuperaItem = ali.Item(pos);
+                   // orig = ali[pos];  
                 }
-                return origemICMS;
+                string format = recuperaItem.OuterXml;
+                return format;
             }
             catch (Exception ex)
             {
@@ -387,6 +357,7 @@ namespace CalculaImposto
                 return null;
             }
         }
+
         public Imposto ImpostoNotaFiscal(int pos, TNfeProc nfeProc)
         {
             try
@@ -400,18 +371,15 @@ namespace CalculaImposto
                 imposto.Produto = nfeProc.NFe.infNFe.det[pos].prod.xProd; //peguei o nome
                 imposto.TipoReceita = nfeProc.NFe.infNFe.ide.natOp; //natureza operação?
 
-                imposto.AliquotaOrigem = Convert.ToDecimal(nfeProc.NFe.infNFe.det[pos].imposto);
+                //  imposto.AliquotaOrigem = Convert.ToDecimal(nfeProc.NFe.infNFe.det[pos].imposto);
                 //  imposto.AliquotaDestino = Convert.ToDecimal(nfeProc.NFe.infNFe.det[pos].imposto.ICMSUFDest.pICMSInter);
 
                 //chamar método para obter aliquota de origem ICMS
-                string valorAliquotaOrigem = RetornaAliquotaOrigemICMS(caminho, pos);
-                //string valorAliquotaOrigem = nfeProc.NFe.infNFe.det[pos].imposto.vTotTrib;
-                var vAO = valorAliquotaOrigem.Replace('.',',');
-               // valorAliquotaOrigem.Replace(".",",");
-                imposto.AliquotaOrigem = Convert.ToDecimal(vAO);
+              /*  string valorAliquotaOrigem = RetornaAliquotaOrigemICMS(caminho, pos);
+                var vAO = valorAliquotaOrigem.Replace('.', ',');
+                imposto.AliquotaOrigem = Convert.ToDecimal(vAO);*/
 
-                //    imposto.AliquotaDestino = Convert.ToDecimal(nfeProc.NFe.infNFe.det[pos].imposto.ICMSUFDest.vICMSUFRemet);
-
+                
                 return imposto;
             }
             catch (Exception ex)
