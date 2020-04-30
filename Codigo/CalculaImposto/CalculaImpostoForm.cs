@@ -338,8 +338,8 @@ namespace CalculaImposto
             {
                 XmlDocument doc = new XmlDocument();
                 doc.Load(pasta);
-                //string origem = "";
-                XmlNodeList elemList = doc.GetElementsByTagName("ICMS10");
+                string origem = "";
+                XmlNodeList elemList = doc.GetElementsByTagName("ICMS"); //nem todo nó filho do icms é icms10! atenção
                 // var orig=elemList[pos];
                 var recuperaItem = elemList.Item(pos);
                 foreach (XmlNode node in elemList)
@@ -350,6 +350,7 @@ namespace CalculaImposto
                 }
                 string format = recuperaItem.OuterXml;
                 return format;
+
             }
             catch (Exception ex)
             {
@@ -375,9 +376,9 @@ namespace CalculaImposto
                 //  imposto.AliquotaDestino = Convert.ToDecimal(nfeProc.NFe.infNFe.det[pos].imposto.ICMSUFDest.pICMSInter);
 
                 //chamar método para obter aliquota de origem ICMS
-              /*  string valorAliquotaOrigem = RetornaAliquotaOrigemICMS(caminho, pos);
+                string valorAliquotaOrigem = RetornaAliquotaOrigemICMS(caminho, pos);
                 var vAO = valorAliquotaOrigem.Replace('.', ',');
-                imposto.AliquotaOrigem = Convert.ToDecimal(vAO);*/
+                imposto.AliquotaOrigem = Convert.ToDecimal(vAO);
 
                 
                 return imposto;
