@@ -338,19 +338,20 @@ namespace CalculaImposto
             {
                 XmlDocument doc = new XmlDocument();
                 doc.Load(pasta);
-                string origem = "";
                 XmlNodeList elemList = doc.GetElementsByTagName("ICMS"); //nem todo nó filho do icms é icms10! atenção
                 // var orig=elemList[pos];
                 var recuperaItem = elemList.Item(pos);
+                
                 foreach (XmlNode node in elemList)
                 {
                     XmlNodeList ali = doc.GetElementsByTagName("orig");
                     recuperaItem = ali.Item(pos);
-                   // orig = ali[pos];  
+                    // orig = ali[pos];  
                 }
                 string format = recuperaItem.OuterXml;
+                format = format.Replace("<orig xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
+                format = format.Replace("</orig>", "");
                 return format;
-
             }
             catch (Exception ex)
             {
@@ -372,15 +373,8 @@ namespace CalculaImposto
                 imposto.Produto = nfeProc.NFe.infNFe.det[pos].prod.xProd; //peguei o nome
                 imposto.TipoReceita = nfeProc.NFe.infNFe.ide.natOp; //natureza operação?
 
-                //  imposto.AliquotaOrigem = Convert.ToDecimal(nfeProc.NFe.infNFe.det[pos].imposto);
-                //  imposto.AliquotaDestino = Convert.ToDecimal(nfeProc.NFe.infNFe.det[pos].imposto.ICMSUFDest.pICMSInter);
-
-                //chamar método para obter aliquota de origem ICMS
-                string valorAliquotaOrigem = RetornaAliquotaOrigemICMS(caminho, pos);
-                var vAO = valorAliquotaOrigem.Replace('.', ',');
-                imposto.AliquotaOrigem = Convert.ToDecimal(vAO);
-
-                
+                imposto.AliquotaOrigem = Convert.ToDecimal(RetornaAliquotaOrigemICMS(caminho, pos));
+                Console.WriteLine(RetornaAliquotaOrigemICMS(caminho, pos));
                 return imposto;
             }
             catch (Exception ex)
