@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Windows.Forms;
 using System.Xml;
-using System.Xml.Linq;
+//using DropboxApi;
+//using CalculaImposto.Dropbox;
 
 namespace CalculaImposto
 {
@@ -17,6 +17,7 @@ namespace CalculaImposto
 
         string subdiretorio;
 
+        string buscaAliquotaOrigem;
         public FrmCalculaImposto()
         {
             InitializeComponent();
@@ -131,7 +132,7 @@ namespace CalculaImposto
                 List<Imposto> impostoList = new List<Imposto>();
                 int quantidadeProdutosNotaF;
                 string arquivo;
-
+         
                 foreach (var file in arquivos)
                 {
                     nfe = new TNfeProc();
@@ -149,6 +150,8 @@ namespace CalculaImposto
                     arquivo = Path.GetFullPath(file);
 
                     quantidadeProdutosNotaF = ContaItensNotaFiscal(arquivo);
+
+                    buscaAliquotaOrigem = RetornaAliquotaOrigemICMS(arquivo, pos);
 
                     for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
                     {
@@ -195,6 +198,8 @@ namespace CalculaImposto
 
                 novaNota = NovoObjeto(nfe);
 
+                buscaAliquotaOrigem = RetornaAliquotaOrigemICMS(caminho, pos);
+
                 for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
                 {
                     imposto = ImpostoNotaFiscal(pos, nfe);
@@ -206,6 +211,9 @@ namespace CalculaImposto
 
                 this.dataGridView1.DataSource =
                    this.notasFiscaisBindingSource;
+
+                //nome_datagrid.Columns[0].ValueType = typeof(System.);
+                //dataGridView2.Columns[6].DefaultCellStyle.Format = "p";
 
                 this.impostoBindingSource.DataSource = impostoList;
                 this.dataGridView2.DataSource =
@@ -373,8 +381,13 @@ namespace CalculaImposto
                 imposto.Produto = nfeProc.NFe.infNFe.det[pos].prod.xProd; //peguei o nome
                 imposto.TipoReceita = nfeProc.NFe.infNFe.ide.natOp; //natureza operação?
 
-                imposto.AliquotaOrigem = Convert.ToDecimal(RetornaAliquotaOrigemICMS(caminho, pos));
-                Console.WriteLine(RetornaAliquotaOrigemICMS(caminho, pos));
+              
+                imposto.AliquotaOrigem = Convert.ToDecimal(buscaAliquotaOrigem);
+                
+                string aliD = "18";
+               
+                imposto.AliquotaDestino = Convert.ToDecimal(String.Format("{0:p}", aliD));
+             
                 return imposto;
             }
             catch (Exception ex)
@@ -384,5 +397,15 @@ namespace CalculaImposto
             }
         }
         #endregion
+        private void btnSalvar_Click(object sender, EventArgs e)
+        {
+         //   Dropbox dropbox = new Dropbox();
+             //   Dropbox dropbox = new Dropbox();
+                /*(@"C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DiretorioTemporario\N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml",
+                @"C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DiretorioTemporario",
+                "N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml");  */
+
+         
+        }
     }
 }

@@ -26,3 +26,8 @@ C:\Users\MAGAZINE\Documents\CalcularImpostos\Codigo\CalculaImposto\obj\x86\Debug
 C:\Users\MAGAZINE\Documents\CalcularImpostos\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.csproj.CoreCompileInputs.cache
 C:\Users\MAGAZINE\Documents\CalcularImpostos\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.exe
 C:\Users\MAGAZINE\Documents\CalcularImpostos\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.pdb
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\Dropbox.Api.dll
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\Newtonsoft.Json.dll
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\Dropbox.Api.xml
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\Newtonsoft.Json.xml
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.csproj.CopyComplete
