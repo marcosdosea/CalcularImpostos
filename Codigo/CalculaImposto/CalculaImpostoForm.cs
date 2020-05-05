@@ -4,8 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Windows.Forms;
 using System.Xml;
-//using DropboxApi;
-//using CalculaImposto.Dropbox;
+using DropboxApi;
 
 namespace CalculaImposto
 {
@@ -399,7 +398,7 @@ namespace CalculaImposto
         #endregion
         private void btnSalvar_Click(object sender, EventArgs e)
         {
-         //   Dropbox dropbox = new Dropbox();
+            DropboxApi.DropboxApi dropbox = new DropboxApi.DropboxApi();
              //   Dropbox dropbox = new Dropbox();
                 /*(@"C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DiretorioTemporario\N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml",
                 @"C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DiretorioTemporario",
