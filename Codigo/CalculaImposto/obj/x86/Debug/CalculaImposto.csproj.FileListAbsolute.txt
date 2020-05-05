@@ -31,3 +31,6 @@ C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\Ne
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\Dropbox.Api.xml
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\Newtonsoft.Json.xml
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.csproj.CopyComplete
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DropboxApi.exe
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DropboxApi.pdb
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DropboxApi.exe.config

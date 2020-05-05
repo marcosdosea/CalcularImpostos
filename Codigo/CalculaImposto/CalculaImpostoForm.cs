@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Windows.Forms;
 using System.Xml;
+using Dropbox.Api;
 using DropboxApi;
 
 namespace CalculaImposto
@@ -399,12 +400,12 @@ namespace CalculaImposto
         private void btnSalvar_Click(object sender, EventArgs e)
         {
             DropboxApi.DropboxApi dropbox = new DropboxApi.DropboxApi();
-             //   Dropbox dropbox = new Dropbox();
-                /*(@"C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DiretorioTemporario\N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml",
-                @"C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DiretorioTemporario",
-                "N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml");  */
-
-         
+            //   Dropbox dropbox = new Dropbox();
+            /*(@"C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DiretorioTemporario\N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml",
+            @"C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DiretorioTemporario",
+            "N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml");  */
+            _ = dropbox.Upload(new DropboxClient("qiPNSnvudfAAAAAAAAAAEKr3ZijwFzxK2ftZ0UxMC8JbPpIfZq7slRu072yymPkU"), "/DiretorioTemporario",
+             "N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml", @"DiretorioTemporario\N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml");
         }
     }
 }
