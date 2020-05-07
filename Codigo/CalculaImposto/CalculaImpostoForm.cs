@@ -5,7 +5,7 @@ using System.IO.Compression;
 using System.Windows.Forms;
 using System.Xml;
 using Dropbox.Api;
-using DropboxApi;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CalculaImposto
 {
@@ -18,6 +18,8 @@ namespace CalculaImposto
         string subdiretorio;
 
         string buscaAliquotaOrigem;
+
+        string aliD = "18";
         public FrmCalculaImposto()
         {
             InitializeComponent();
@@ -49,10 +51,8 @@ namespace CalculaImposto
                     {
                         try
                         {
-
                             ExtrairZip(caminho);
                             DirectorioExiste(pastaSaida);
-
                         }
                         catch (Exception ex)
                         {
@@ -61,7 +61,7 @@ namespace CalculaImposto
                     }
                     else
                     {
-                        //passei a pasta caminho;
+                        //passei a pasta 'caminho';
                         ProcessarArquivo();
                     }
                 }
@@ -132,7 +132,7 @@ namespace CalculaImposto
                 List<Imposto> impostoList = new List<Imposto>();
                 int quantidadeProdutosNotaF;
                 string arquivo;
-         
+
                 foreach (var file in arquivos)
                 {
                     nfe = new TNfeProc();
@@ -211,9 +211,6 @@ namespace CalculaImposto
 
                 this.dataGridView1.DataSource =
                    this.notasFiscaisBindingSource;
-
-                //nome_datagrid.Columns[0].ValueType = typeof(System.);
-                //dataGridView2.Columns[6].DefaultCellStyle.Format = "p";
 
                 this.impostoBindingSource.DataSource = impostoList;
                 this.dataGridView2.DataSource =
@@ -346,15 +343,13 @@ namespace CalculaImposto
             {
                 XmlDocument doc = new XmlDocument();
                 doc.Load(pasta);
-                XmlNodeList elemList = doc.GetElementsByTagName("ICMS"); //nem todo nó filho do icms é icms10! atenção
-                // var orig=elemList[pos];
+                XmlNodeList elemList = doc.GetElementsByTagName("ICMS"); 
                 var recuperaItem = elemList.Item(pos);
-                
+
                 foreach (XmlNode node in elemList)
                 {
                     XmlNodeList ali = doc.GetElementsByTagName("orig");
                     recuperaItem = ali.Item(pos);
-                    // orig = ali[pos];  
                 }
                 string format = recuperaItem.OuterXml;
                 format = format.Replace("<orig xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
@@ -381,13 +376,13 @@ namespace CalculaImposto
                 imposto.Produto = nfeProc.NFe.infNFe.det[pos].prod.xProd; //peguei o nome
                 imposto.TipoReceita = nfeProc.NFe.infNFe.ide.natOp; //natureza operação?
 
-              
+
                 imposto.AliquotaOrigem = Convert.ToDecimal(buscaAliquotaOrigem);
-                
-                string aliD = "18";
-               
+
+                // aliD = "18" -> valor atual da alíquota de destino de sergipe;
+
                 imposto.AliquotaDestino = Convert.ToDecimal(String.Format("{0:p}", aliD));
-             
+
                 return imposto;
             }
             catch (Exception ex)
@@ -397,15 +392,89 @@ namespace CalculaImposto
             }
         }
         #endregion
-        private void btnSalvar_Click(object sender, EventArgs e)
+     /*   private void btnSalvar_Click(object sender, EventArgs e)
         {
             DropboxApi.DropboxApi dropbox = new DropboxApi.DropboxApi();
-            //   Dropbox dropbox = new Dropbox();
-            /*(@"C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DiretorioTemporario\N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml",
-            @"C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DiretorioTemporario",
-            "N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml");  */
+           
+           //(@"C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DiretorioTemporario\N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml",
+          //  @"C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DiretorioTemporario",
+          //  "N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml");  
+            
             _ = dropbox.Upload(new DropboxClient("qiPNSnvudfAAAAAAAAAAEKr3ZijwFzxK2ftZ0UxMC8JbPpIfZq7slRu072yymPkU"), "/DiretorioTemporario",
              "N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml", @"DiretorioTemporario\N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml");
+            mensagemSucesso();
+        }
+*/
+        private void btnSalvar_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog salvar = new SaveFileDialog(); 
+            //SaveFileDialog
+
+            Excel.Application App; // Aplicação Excel
+            Excel.Workbook WorkBook; // Pasta
+            Excel.Worksheet WorkSheet; // Planilha
+            object misValue = System.Reflection.Missing.Value;
+
+            App = new Excel.Application();
+            WorkBook = App.Workbooks.Add(misValue);
+            WorkSheet = (Excel.Worksheet)WorkBook.Worksheets.get_Item(1);
+            int i = 0;
+            int j = 0;
+
+            // passa as celulas do DataGridView para a Pasta do Excel
+            for (i = 0; i <= dataGridView2.RowCount - 1; i++)
+            {
+                for (j = 0; j <= dataGridView2.ColumnCount - 1; j++)
+                {
+                    DataGridViewCell cell = dataGridView2[j, i];
+                    WorkSheet.Cells[i + 1, j + 1] = cell.Value;
+                }
+            }
+
+            // define algumas propriedades da caixa salvar
+            salvar.Title = "Exportar para Excel";
+            salvar.Filter = "Arquivo do Excel *.xls | *.xls";
+            salvar.ShowDialog(); // mostra
+
+            // salva o arquivo
+            WorkBook.SaveAs(salvar.FileName, Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue,
+
+            Excel.XlSaveAsAccessMode.xlExclusive, misValue, misValue, misValue, misValue, misValue);
+            WorkBook.Close(true, misValue, misValue);
+            App.Quit(); // encerra o excel
+
+            MessageBox.Show("Exportado com sucesso!");
+
+         /*   SALVAR ARQUIVO NO DROPBOX: ESTÁ FUNCIONANDO, FALTA ACERTAR O CAMINHO DO ARQUIVO GERADO A PARTIR DA GRID
+          *   DropboxApi.DropboxApi dropbox = new DropboxApi.DropboxApi(); 
+            _ = dropbox.Upload(new DropboxClient("qiPNSnvudfAAAAAAAAAAEKr3ZijwFzxK2ftZ0UxMC8JbPpIfZq7slRu072yymPkU"), "/DiretorioTemporario",
+             "N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml", @"DiretorioTemporario\N_25191108475502000180550010000538061220538064_PB_000000263383599_49304497_procNFe.xml");
+            mensagemSucesso();
+            */
+        }
+        
+        private void mensagemSucesso()
+        {
+            MessageBox.Show("Arquivo salvo no dropbox");
+        }
+        /// <summary>
+        /// Pegar célula de aliquota de destino, editada na grid pelo contador e atualizar seu valor
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dataGridView2_CellEndEdit(
+        object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                //obtendo o valor que foi alterado na grid
+                aliD = dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+                MessageBox.Show(String.Format("Valor alterado com sucesso! Novo valor de aliquota destino: {0}", aliD));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Não foi possível atualizar o valor. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
