@@ -20,7 +20,7 @@ namespace DropboxApi
         /// <returns></returns>
         public static async Task Run()
         {
-            using (var dbx = new DropboxClient("qiPNSnvudfAAAAAAAAAAEKr3ZijwFzxK2ftZ0UxMC8JbPpIfZq7slRu072yymPkU"))
+            using (var dbx = new DropboxClient("qiPNSnvudfAAAAAAAAAAEmV5ag8XoYVezhOQItCeNjzqJVbQDI6_M7YPa_sRWSZU"))
             {
                 var full = await dbx.Users.GetCurrentAccountAsync();
                 Console.WriteLine("{0} - {1}", full.Name.DisplayName, full.Email);
@@ -30,7 +30,7 @@ namespace DropboxApi
         /// Para fazer uppload de um arquivo para o dropbox
         /// </summary>
         /// <param name="dbx"></param>
-        /// <param name="folder">Pasta onde se encontra o arquivo</param>
+        /// <param name="folder">Pasta que será criada no dropbox</param>
         /// <param name="file">Nome do arquivo com a extensão</param>
         /// <param name="content">Pasta onde se encontra o arquivo mais o nome do arquivo com extensão. Endereço completo até o arquivo</param>
         /// <returns></returns>
