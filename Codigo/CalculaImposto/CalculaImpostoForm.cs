@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.DirectoryServices.ActiveDirectory;
 using System.IO;
 using System.IO.Compression;
-using System.Reflection;
 using System.Windows.Forms;
 using System.Xml;
 using Dropbox.Api;
@@ -16,15 +13,21 @@ namespace CalculaImposto
     {
         private string caminho;
 
-        string pastaSaida;
+        private string pastaSaida;
 
-        string subdiretorio;
+        private string subdiretorio;
 
-        string pastaExportarGrid;
+        private string pastaExportarGrid;
 
-        string buscaAliquotaOrigem;
+        private string dataAtualMVAFormatada;
 
-        string aliD = "18";
+        private string buscaAliquotaOrigem;
+
+        private string aliD = "18";
+
+        private DateTime dataAtualizacaoMVA;
+
+        private decimal MVA;
         public FrmCalculaImposto()
         {
             InitializeComponent();
@@ -374,7 +377,12 @@ namespace CalculaImposto
                 return null;
             }
         }
-
+        /// <summary>
+        /// Cria um novo objeto do tipo Imposto. Cada nota Fiscal possui um ou vários produtos. Cada produto possui imposto. 
+        /// </summary>
+        /// <param name="pos">Passa a posição do item da lista de produtos na nota fiscal que está sendo lido</param>
+        /// <param name="nfeProc">Um objeto do tipo TNfeProc</param>
+        /// <returns></returns>
         public Imposto ImpostoNotaFiscal(int pos, TNfeProc nfeProc)
         {
             try
@@ -395,6 +403,11 @@ namespace CalculaImposto
 
                 imposto.AliquotaDestino = Convert.ToDecimal(String.Format("{0:p}", aliD));
 
+                //se o campo da datagriv mva for alterado, altera a dataAtualizacao, caso não, não faz nada! observação importante
+                imposto.MVA = MVA;
+             
+                imposto.DataAtualizacaoMVA = dataAtualMVAFormatada;
+              
                 return imposto;
             }
             catch (Exception ex)
@@ -410,8 +423,9 @@ namespace CalculaImposto
         /// <param name="caminhoCompleto">Caminho completo do diretório até chegar ao arquivo exportado da grid, com sua extensão "*.xls"</param>
         private void Dropbox(string nomeArquivo, string caminhoCompleto)
         {
+            //o token está expirando... 
             DropboxApi.DropboxApi dropbox = new DropboxApi.DropboxApi();
-            _ = dropbox.Upload(new DropboxClient("qiPNSnvudfAAAAAAAAAAEmV5ag8XoYVezhOQItCeNjzqJVbQDI6_M7YPa_sRWSZU"), "/ResumoNotasFiscais",
+            _ = dropbox.Upload(new DropboxClient("qiPNSnvudfAAAAAAAAAAFd3eYqmhfFFlV8E6SjIc2EdWtYGOJsiehCsE8VAc62jz"), "/ResumoNotasFiscais",
              nomeArquivo, caminhoCompleto);
             mensagemSucesso();
         }
@@ -453,7 +467,7 @@ namespace CalculaImposto
             int valorInteiro = numAleatorio.Next();
             DateTime dataHoje = DateTime.Today;
             string data = dataHoje.ToString("D");
-            string nomeArquivo = "ResumoNotasFiscais-" + data + " " +valorInteiro+ ".xls";
+            string nomeArquivo = "ResumoNotasFiscais-" + data+ " "+valorInteiro+ ".xls";
             
             //Pega caminho do arquivo criado, dentro da nova pasta criada na aplicação 
             string CaminhoRaiz = System.Environment.CurrentDirectory; //Pasta debug
@@ -469,6 +483,7 @@ namespace CalculaImposto
 
             //Salva no dropbox
             Dropbox(nomeArquivo, caminhoCompleto);
+
         }
         
         private void mensagemSucesso()
@@ -484,33 +499,91 @@ namespace CalculaImposto
         private void dataGridView2_CellEndEdit(
         object sender, DataGridViewCellEventArgs e)
         {
+            // dataAtualizacaoMVA = DateTime.Today;
             try
             {
                 //obtendo o valor que foi alterado na grid
-                aliD = dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
-                //pergunto se deseja atualizar todos os campos de alíquota Destino com esse valor, caso sim:
-                DialogResult dialogResult = MessageBox.Show("Deseja atualizar todos os campos de alíquota destino para esse valor?", "Atenção", MessageBoxButtons.YesNo);
-                if (dialogResult == DialogResult.Yes)
-                { 
-                    // Limpa as células selecionadas na grid
-                    dataGridView2.ClearSelection();
-
-                    // Faz toda coluna not sortable.
-                    for (int i = 0; i < dataGridView2.Columns.Count; i++)
-                        dataGridView2.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
-
-                    // Seta o modo selection para Column.
-                    dataGridView2.SelectionMode = DataGridViewSelectionMode.FullColumnSelect;
-
-                    // Eu seleciono a coluna AliquotaDestino  
-                    if (dataGridView2.Columns.Count > 0)  // Checa se eu tenho pelo menos uma coluna.
-                        dataGridView2.Columns[5].Selected = true;
-                    for (int i = 0; i < dataGridView2.RowCount; i++) //Crio um for do tamanho da quantidade de linhas existente
-                        dataGridView2.Rows[i].Cells[5].Value = aliD; //agora basta inserir o valor da alíquota de destino em todas as células dessa coluna
-                }
-                else if (dialogResult == DialogResult.No)
+                string valorAlteradoGrid = dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+                if (e.ColumnIndex.Equals(5)) //se o dado alterado for na coluna 5, ao seja, aliquota destino, segue esse comportamento:
                 {
-                    MessageBox.Show(String.Format("Valor alterado com sucesso! Novo valor de aliquota destino: {0}", aliD));
+                    aliD = valorAlteradoGrid;
+                    //pergunto se deseja atualizar todos os campos de alíquota Destino com esse valor, caso sim:
+                    DialogResult dialogResult = MessageBox.Show("Deseja atualizar todos os campos de alíquota destino para esse valor?", "Atenção", MessageBoxButtons.YesNo);
+                    if (dialogResult == DialogResult.Yes)
+                    {
+                        // Limpa as células selecionadas na grid
+                        dataGridView2.ClearSelection();
+
+                        // Faz toda coluna not sortable.
+                        for (int i = 0; i < dataGridView2.Columns.Count; i++)
+                            dataGridView2.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+
+                        // Seta o modo selection para Column.
+                        dataGridView2.SelectionMode = DataGridViewSelectionMode.FullColumnSelect;
+
+                        // Eu seleciono a coluna AliquotaDestino  
+                        if (dataGridView2.Columns.Count > 0)  // Checa se eu tenho pelo menos uma coluna.
+                            dataGridView2.Columns[5].Selected = true;
+                        for (int i = 0; i < dataGridView2.RowCount; i++) //Crio um for do tamanho da quantidade de linhas existente
+                            dataGridView2.Rows[i].Cells[5].Value = aliD; //agora basta inserir o valor da alíquota de destino em todas as células dessa coluna
+                    }
+                    else if (dialogResult == DialogResult.No)
+                    {
+                        MessageBox.Show(String.Format("Valor alterado com sucesso! Novo valor de aliquota destino: {0}", aliD));
+                    }
+                } else if (e.ColumnIndex.Equals(7)) //se o dado alterado for na coluna 7, MVA
+                {
+                    decimal valor = Convert.ToDecimal(valorAlteradoGrid);
+                    if (valor !=MVA)
+                    {
+                        //produtos com mesmo ncm E ORIGEM, seta de uma vez o MESMO MVA
+                        MVA = Convert.ToDecimal(valorAlteradoGrid);
+                        //pega a data do sistema no momento em que o MVA foi alterado
+                        dataAtualizacaoMVA = DateTime.Today;
+                        dataAtualMVAFormatada = dataAtualizacaoMVA.ToString("dd/MM/yyyy"); //não está inserindo a data s2
+                        dataGridView2.Rows[e.RowIndex].Cells[6].Value = dataAtualMVAFormatada;
+
+                        DialogResult dialogResult = MessageBox.Show("Deseja atualizar todos os campos de MVA, com mesmo NCM e origem, para esse valor?", "Atenção", MessageBoxButtons.YesNo);
+                        if (dialogResult == DialogResult.Yes)
+                        {
+                            // Limpa as células selecionadas na grid
+                            dataGridView2.ClearSelection();
+
+                            // Faz toda coluna not sortable.
+                            for (int i = 0; i < dataGridView2.Columns.Count; i++)
+                                dataGridView2.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+
+                            // Seta o modo selection para Column.
+                            dataGridView2.SelectionMode = DataGridViewSelectionMode.FullColumnSelect;
+
+                            // Eu seleciono a coluna mva  
+                            if (dataGridView2.Columns.Count > 0)
+                            { // Checa se eu tenho pelo menos uma coluna.
+                                dataGridView2.Columns[7].Selected = true;
+                             //   dataGridView2.Columns[1].Selected = true; //NCM
+                             //   dataGridView2.Columns[4].Selected = true; //ORIGEM
+                            }
+                            for (int i = 0; i < dataGridView2.RowCount; i++)
+                            { //Crio um for do tamanho da quantidade de linhas existente
+                                //CHECAR PRIMEIRO SE O NCM E ORIGEM da linha alterada é igual
+                                int linha = e.RowIndex;  //PEGAR O INDEX DA LINHA ALTERADA 
+                                string ncm = dataGridView2.Rows[linha].Cells[1].Value.ToString();//PEGAR O ncm DA LINHA ALTERADA 
+                                string origem = dataGridView2.Rows[linha].Cells[4].Value.ToString();//PEGAR a aliquota de origem DA LINHA ALTERADA 
+
+                                string ncmResto = dataGridView2.Rows[i].Cells[1].Value.ToString(); //PEGAR O ncm do resto  
+                                string origemResto = dataGridView2.Rows[i].Cells[4].Value.ToString();//PEGAR a aliquota do resto 
+                                if (ncmResto.Equals(ncm) && (origemResto.Equals(origem)))
+                                {
+                                    dataGridView2.Rows[i].Cells[7].Value = MVA; //agora basta inserir o valor mva em todas as células dessa coluna
+                                    dataGridView2.Rows[i].Cells[6].Value = dataAtualMVAFormatada;
+                                }
+                            }
+                        }
+                        else if (dialogResult == DialogResult.No)
+                        {
+                            MessageBox.Show(String.Format("Valor alterado com sucesso! Novo valor de MVA: {0}", MVA));
+                        }
+                    }
                 }
             }
             catch (Exception ex)

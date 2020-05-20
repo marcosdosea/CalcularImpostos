@@ -20,7 +20,7 @@ namespace DropboxApi
         /// <returns></returns>
         public static async Task Run()
         {
-            using (var dbx = new DropboxClient("qiPNSnvudfAAAAAAAAAAEmV5ag8XoYVezhOQItCeNjzqJVbQDI6_M7YPa_sRWSZU"))
+            using (var dbx = new DropboxClient("qiPNSnvudfAAAAAAAAAAFd3eYqmhfFFlV8E6SjIc2EdWtYGOJsiehCsE8VAc62jz"))
             {
                 var full = await dbx.Users.GetCurrentAccountAsync();
                 Console.WriteLine("{0} - {1}", full.Name.DisplayName, full.Email);
