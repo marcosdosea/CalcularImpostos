@@ -30,18 +30,24 @@
         {
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.ValorFrete = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.btnBuscarNfe = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.btnSalvar = new System.Windows.Forms.Button();
             this.dataGridView2 = new System.Windows.Forms.DataGridView();
+            this.NumeroNotaFiscal = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Produto = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DataAtualizacaoMVA = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.dataGridView3 = new System.Windows.Forms.DataGridView();
             this.tabPage4 = new System.Windows.Forms.TabPage();
@@ -49,7 +55,6 @@
             this.textBoxFile = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.openFileDialogNfe = new System.Windows.Forms.OpenFileDialog();
-            this.ValorFrete = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.numeroDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.fornecedorDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataEmissaoDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -91,7 +96,7 @@
             this.tabControl1.Location = new System.Drawing.Point(-3, 1);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(785, 392);
+            this.tabControl1.Size = new System.Drawing.Size(774, 433);
             this.tabControl1.TabIndex = 0;
             // 
             // tabPage1
@@ -103,7 +108,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(777, 366);
+            this.tabPage1.Size = new System.Drawing.Size(766, 407);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Notas Fiscais";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -128,6 +133,15 @@
             this.dataGridView1.Size = new System.Drawing.Size(735, 317);
             this.dataGridView1.TabIndex = 6;
             // 
+            // ValorFrete
+            // 
+            this.ValorFrete.DataPropertyName = "ValorFrete";
+            dataGridViewCellStyle2.NullValue = null;
+            this.ValorFrete.DefaultCellStyle = dataGridViewCellStyle2;
+            this.ValorFrete.HeaderText = "ValorFrete";
+            this.ValorFrete.Name = "ValorFrete";
+            this.ValorFrete.ReadOnly = true;
+            // 
             // btnBuscarNfe
             // 
             this.btnBuscarNfe.Location = new System.Drawing.Point(666, 3);
@@ -151,37 +165,57 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(3, 9);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(130, 13);
+            this.label2.Size = new System.Drawing.Size(117, 13);
             this.label2.TabIndex = 3;
-            this.label2.Text = "Arquivo Zip Notas Fiscais:";
+            this.label2.Text = "Arquivos Notas Fiscais:";
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.btnSalvar);
             this.tabPage2.Controls.Add(this.dataGridView2);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(777, 366);
+            this.tabPage2.Size = new System.Drawing.Size(766, 407);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Imposto NCM";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // btnSalvar
+            // 
+            this.btnSalvar.Location = new System.Drawing.Point(673, 366);
+            this.btnSalvar.Name = "btnSalvar";
+            this.btnSalvar.Size = new System.Drawing.Size(88, 24);
+            this.btnSalvar.TabIndex = 1;
+            this.btnSalvar.Text = "Salvar";
+            this.btnSalvar.UseVisualStyleBackColor = true;
+            this.btnSalvar.Click += new System.EventHandler(this.btnSalvar_Click);
             // 
             // dataGridView2
             // 
             this.dataGridView2.AutoGenerateColumns = false;
             this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView2.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.NumeroNotaFiscal,
             this.nCMDataGridViewTextBoxColumn,
-            this.tipoReceitaDataGridViewTextBoxColumn,
             this.Produto,
+            this.tipoReceitaDataGridViewTextBoxColumn,
             this.aliquotaOrigemDataGridViewTextBoxColumn,
             this.aliquotaDestinoDataGridViewTextBoxColumn,
+            this.DataAtualizacaoMVA,
             this.mVADataGridViewTextBoxColumn});
             this.dataGridView2.DataSource = this.impostoBindingSource;
             this.dataGridView2.Location = new System.Drawing.Point(11, 6);
             this.dataGridView2.Name = "dataGridView2";
             this.dataGridView2.Size = new System.Drawing.Size(759, 354);
             this.dataGridView2.TabIndex = 0;
+            this.dataGridView2.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView2_CellEndEdit);
+            // 
+            // NumeroNotaFiscal
+            // 
+            this.NumeroNotaFiscal.DataPropertyName = "Numero";
+            this.NumeroNotaFiscal.HeaderText = "Número NotaFiscal";
+            this.NumeroNotaFiscal.Name = "NumeroNotaFiscal";
             // 
             // Produto
             // 
@@ -189,13 +223,22 @@
             this.Produto.HeaderText = "Produto";
             this.Produto.Name = "Produto";
             // 
+            // DataAtualizacaoMVA
+            // 
+            this.DataAtualizacaoMVA.DataPropertyName = "DataAtualizacaoMVA";
+            dataGridViewCellStyle6.Format = "d";
+            dataGridViewCellStyle6.NullValue = null;
+            this.DataAtualizacaoMVA.DefaultCellStyle = dataGridViewCellStyle6;
+            this.DataAtualizacaoMVA.HeaderText = "Data AtualizacaoMVA";
+            this.DataAtualizacaoMVA.Name = "DataAtualizacaoMVA";
+            // 
             // tabPage3
             // 
             this.tabPage3.Controls.Add(this.dataGridView3);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(777, 366);
+            this.tabPage3.Size = new System.Drawing.Size(766, 407);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Extrato";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -225,7 +268,7 @@
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(777, 366);
+            this.tabPage4.Size = new System.Drawing.Size(766, 407);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Configurações";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -260,15 +303,6 @@
             // openFileDialogNfe
             // 
             this.openFileDialogNfe.FileName = "openFileDialog";
-            // 
-            // ValorFrete
-            // 
-            this.ValorFrete.DataPropertyName = "ValorFrete";
-            dataGridViewCellStyle2.NullValue = null;
-            this.ValorFrete.DefaultCellStyle = dataGridViewCellStyle2;
-            this.ValorFrete.HeaderText = "ValorFrete";
-            this.ValorFrete.Name = "ValorFrete";
-            this.ValorFrete.ReadOnly = true;
             // 
             // numeroDataGridViewTextBoxColumn
             // 
@@ -338,6 +372,8 @@
             // aliquotaDestinoDataGridViewTextBoxColumn
             // 
             this.aliquotaDestinoDataGridViewTextBoxColumn.DataPropertyName = "AliquotaDestino";
+            dataGridViewCellStyle5.NullValue = null;
+            this.aliquotaDestinoDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle5;
             this.aliquotaDestinoDataGridViewTextBoxColumn.HeaderText = "AliquotaDestino";
             this.aliquotaDestinoDataGridViewTextBoxColumn.Name = "aliquotaDestinoDataGridViewTextBoxColumn";
             // 
@@ -395,7 +431,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(783, 408);
+            this.ClientSize = new System.Drawing.Size(774, 438);
             this.Controls.Add(this.tabControl1);
             this.Name = "FrmCalculaImposto";
             this.Text = "Cálculo de Impostos";
@@ -434,12 +470,6 @@
         private System.Windows.Forms.BindingSource notasFiscaisBindingSource;
         private System.Windows.Forms.DataGridView dataGridView2;
         private System.Windows.Forms.BindingSource impostoBindingSource;
-        private System.Windows.Forms.DataGridViewTextBoxColumn nCMDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn tipoReceitaDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Produto;
-        private System.Windows.Forms.DataGridViewTextBoxColumn aliquotaOrigemDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn aliquotaDestinoDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn mVADataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridView dataGridView3;
         private System.Windows.Forms.DataGridViewTextBoxColumn numeroNotaDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn valorTotalNotaDataGridViewTextBoxColumn;
@@ -455,6 +485,15 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ValorFrete;
         private System.Windows.Forms.DataGridViewTextBoxColumn valorProdutosDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn valorTotalDataGridViewTextBoxColumn;
+        private System.Windows.Forms.Button btnSalvar;
+        private System.Windows.Forms.DataGridViewTextBoxColumn NumeroNotaFiscal;
+        private System.Windows.Forms.DataGridViewTextBoxColumn nCMDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Produto;
+        private System.Windows.Forms.DataGridViewTextBoxColumn tipoReceitaDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn aliquotaOrigemDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn aliquotaDestinoDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn DataAtualizacaoMVA;
+        private System.Windows.Forms.DataGridViewTextBoxColumn mVADataGridViewTextBoxColumn;
     }
 }
 
