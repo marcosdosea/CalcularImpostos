@@ -15,7 +15,7 @@ namespace CalculaImposto
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FrmCalculaImposto());
+            Application.Run(new FormSplashScreen());
         }
     }
 }

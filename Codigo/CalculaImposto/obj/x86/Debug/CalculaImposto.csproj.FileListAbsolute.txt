@@ -34,3 +34,9 @@ C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debu
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DropboxApi.exe
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DropboxApi.pdb
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\DropboxApi.exe.config
+C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.FormSplashScreen.resources
+C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\Interop.WMPLib.dll
+C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\AxInterop.WMPLib.dll
+C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\Interop.WMPLib.dll
+C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\AxInterop.WMPLib.dll
+C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.csproj.ResolveComReference.cache

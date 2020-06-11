@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
 using Dropbox.Api;
+using Microsoft.Office.Interop.Excel;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CalculaImposto
@@ -31,6 +34,17 @@ namespace CalculaImposto
         public FrmCalculaImposto()
         {
             InitializeComponent();
+            /*
+            
+            FormSplashScreen frmSplashScreen = new FormSplashScreen();
+
+            frmSplashScreen.Show();
+
+          //  Thread.Sleep(3000);
+
+          //   frmSplashScreen.Close();*/
+           
+
         }
 
         private void BtnBuscar_Click(object sender, EventArgs e)
@@ -425,67 +439,227 @@ namespace CalculaImposto
         {
             //o token está expirando... 
             DropboxApi.DropboxApi dropbox = new DropboxApi.DropboxApi();
-            _ = dropbox.Upload(new DropboxClient("qiPNSnvudfAAAAAAAAAAFd3eYqmhfFFlV8E6SjIc2EdWtYGOJsiehCsE8VAc62jz"), "/ResumoNotasFiscais",
+            _ = dropbox.Upload(new DropboxClient("qiPNSnvudfAAAAAAAAAAHhSXbGP3VMh04WeDkcTS6MIBm35hoL6ZpTLVZeqvvcT4"), "/ResumoNotasFiscais",
              nomeArquivo, caminhoCompleto);
             mensagemSucesso();
         }
-        /// <summary>
-        /// Exporta a segunda grid para o formato "*.xls", salva o arquivo localmente em uma pasta gerada e chama o método Dropbox.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnSalvar_Click(object sender, EventArgs e)
+        private void atual_Click(object sender, EventArgs e)
         {
-            //cria pasta na aplicacao para salvar localmente o arquivo excel
+            //cria pasta na aplicacao para salvar localmente o arquivo txt
             pastaExportarGrid = "ResumoNotasFiscais";
             CriarDirectorio(pastaExportarGrid);
-
-            // Aplicação Excel
-            Excel.Application App; 
-            Excel.Workbook WorkBook; 
-            Excel.Worksheet WorkSheet; 
-            object misValor = System.Reflection.Missing.Value;
-
-            App = new Excel.Application();
-            WorkBook = App.Workbooks.Add(misValor);
-            WorkSheet = (Excel.Worksheet)WorkBook.Worksheets.get_Item(1);
-            int i = 0;
-            int j = 0;
-
-            // Passa as celulas do DataGridView para a Pasta do Excel
-            for (i = 0; i <= dataGridView2.RowCount - 1; i++)
-            {
-                for (j = 0; j <= dataGridView2.ColumnCount - 1; j++)
-                {
-                    DataGridViewCell cell = dataGridView2[j, i];
-                    WorkSheet.Cells[i + 1, j + 1] = cell.Value;
-                }
-            }
-          
             //Gera um nome para novo arquivo
-            Random numAleatorio = new Random(); 
+            Random numAleatorio = new Random();
             int valorInteiro = numAleatorio.Next();
             DateTime dataHoje = DateTime.Today;
             string data = dataHoje.ToString("D");
-            string nomeArquivo = "ResumoNotasFiscais-" + data+ " "+valorInteiro+ ".xls";
-            
+            string nomeArquivo = "ResumoNotasFiscais-" + data + " " + valorInteiro + ".txt";
+
             //Pega caminho do arquivo criado, dentro da nova pasta criada na aplicação 
             string CaminhoRaiz = System.Environment.CurrentDirectory; //Pasta debug
-            string[] pasta = { CaminhoRaiz, pastaExportarGrid, nomeArquivo};
-            string caminhoCompleto = Path.Combine(pasta); 
+            string[] pasta = { CaminhoRaiz, pastaExportarGrid, nomeArquivo };
+            string caminhoCompleto = Path.Combine(pasta);
+            // o caminho será a pasta virtual escolhida ao abrir a aplicação pelo contador
 
-            //salva localmente
-            WorkBook.SaveAs(caminhoCompleto, Excel.XlFileFormat.xlWorkbookNormal, misValor, misValor, misValor, misValor,
+            StringBuilder sb = new StringBuilder();
+            using (StreamWriter sw = new StreamWriter(@"C:\Users\barbi\Dropbox\ResumoNotasFiscais\txt.txt"))
+            {
+                foreach (DataGridViewRow row in dataGridView2.Rows)
+               {
+                   
+                       sb.AppendLine(string.Format("{0} {1} {2}", row.Cells["nCMDataGridViewTextBoxColumn"].Value.ToString(), row.Cells["aliquotaOrigemDataGridViewTextBoxColumn"].Value.ToString(), row.Cells["aliquotaDestinoDataGridViewTextBoxColumn"].Value.ToString()));
+                        sw.WriteLine(sb.ToString());
 
-            Excel.XlSaveAsAccessMode.xlExclusive, misValor, misValor, misValor, misValor, misValor);
-            WorkBook.Close(true, misValor, misValor);
-            App.Quit(); 
-
-            //Salva no dropbox
-            Dropbox(nomeArquivo, caminhoCompleto);
-
+                }
+                MessageBox.Show("Data Exported");
+                sw.Flush();
+                sw.Close();
+            }  
+            
+            sb.Clear();
         }
-        
+        private void btnSalvar_Click(object sender, EventArgs e)
+        {
+            System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\barbi\Dropbox\ResumoNotasFiscais\txt.txt");
+            String sLine = "";
+            for (int i = 0; i <= dataGridView2.RowCount-1; i++)
+            { //Crio um for do tamanho da quantidade de linhas existente
+                sLine = sLine + dataGridView2.Rows[i].Cells[1].Value //PEGAR O ncm 
+                + dataGridView2.Rows[i].Cells[4].Value//PEGAR a aliquota de origem 
+                + dataGridView2.Rows[i].Cells[5].Value //PEGAR a aliquota de destino  
+                + dataGridView2.Rows[i].Cells[6].Value //PEGAR a data de atualizacao  
+                + dataGridView2.Rows[i].Cells[7].Value;//PEGAR o mva
+                sLine = sLine + ",";
+                file.WriteLine(sLine);
+                sLine = "";
+            }
+            file.Close();
+            System.Windows.Forms.MessageBox.Show("Dados exportados com sucesso.", "Program Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        private void altera_Click(object sender, EventArgs e)
+        {
+            //cria pasta na aplicacao para salvar localmente o arquivo txt
+            pastaExportarGrid = "ResumoNotasFiscais";
+            CriarDirectorio(pastaExportarGrid);
+            //Gera um nome para novo arquivo
+            Random numAleatorio = new Random();
+            int valorInteiro = numAleatorio.Next();
+            DateTime dataHoje = DateTime.Today;
+            string data = dataHoje.ToString("D");
+            string nomeArquivo = "ResumoNotasFiscais-" + data + " " + valorInteiro + ".txt";
+
+            //Pega caminho do arquivo criado, dentro da nova pasta criada na aplicação 
+            string CaminhoRaiz = System.Environment.CurrentDirectory; //Pasta debug
+            string[] pasta = { CaminhoRaiz, pastaExportarGrid, nomeArquivo };
+            string caminhoCompleto = Path.Combine(pasta);
+            // o caminho será a pasta virtual escolhida ao abrir a aplicação pelo contador
+            //This line of code creates a text file for the data export.
+            System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\barbi\Dropbox\ResumoNotasFiscais\txt.txt");
+            try
+            {
+                string sLine = "";
+
+                //This for loop loops through each row in the table
+                for (int r = 0; r <= dataGridView2.Rows.Count - 1; r++)
+                {
+                    //This for loop loops through each column, and the row number
+                    //is passed from the for loop above.
+                    for (int c = 0; c <= dataGridView2.Columns.Count - 1; c++)
+                    {
+                        sLine = sLine + dataGridView2.Rows[r].Cells[c].Value;
+                        if (c != dataGridView2.Columns.Count - 1)
+                        {
+                            //A comma is added as a text delimiter in order
+                            //to separate each field in the text file.
+                            //You can choose another character as a delimiter.
+                            sLine = sLine + ",";
+                        }
+                    }
+                    //The exported text is written to the text file, one line at a time.
+                    file.WriteLine(sLine);
+                    sLine = "";
+                }
+
+                file.Close();
+                System.Windows.Forms.MessageBox.Show("Dados exportados com sucesso.", "Program Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (System.Exception err)
+            {
+                System.Windows.Forms.MessageBox.Show(err.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                file.Close();
+            }
+        }
+        private void funciona_Click(object sender, EventArgs e)
+        {
+            //cria pasta na aplicacao para salvar localmente o arquivo txt
+            pastaExportarGrid = "ResumoNotasFiscais";
+            CriarDirectorio(pastaExportarGrid);
+            //Gera um nome para novo arquivo
+            Random numAleatorio = new Random();
+            int valorInteiro = numAleatorio.Next();
+            DateTime dataHoje = DateTime.Today;
+            string data = dataHoje.ToString("D");
+            string nomeArquivo = "ResumoNotasFiscais-" + data + " " + valorInteiro + ".txt";
+
+            //Pega caminho do arquivo criado, dentro da nova pasta criada na aplicação 
+            string CaminhoRaiz = System.Environment.CurrentDirectory; //Pasta debug
+            string[] pasta = { CaminhoRaiz, pastaExportarGrid, nomeArquivo };
+            string caminhoCompleto = Path.Combine(pasta);
+            // o caminho será a pasta virtual escolhida ao abrir a aplicação pelo contador
+            //This line of code creates a text file for the data export.
+            System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\barbi\Dropbox\ResumoNotasFiscais\txt.txt");
+            try
+            {
+                string sLine = "";
+
+                //This for loop loops through each row in the table
+                for (int r = 0; r <= dataGridView2.Rows.Count - 1; r++)
+                {
+                    //This for loop loops through each column, and the row number
+                    //is passed from the for loop above.
+                    for (int c = 0; c <= dataGridView2.Columns.Count - 1; c++)
+                    {
+                        sLine = sLine + dataGridView2.Rows[r].Cells[c].Value;
+                        if (c != dataGridView2.Columns.Count - 1)
+                        {
+                            //A comma is added as a text delimiter in order
+                            //to separate each field in the text file.
+                            //You can choose another character as a delimiter.
+                            sLine = sLine + ",";
+                        }
+                    }
+                    //The exported text is written to the text file, one line at a time.
+                    file.WriteLine(sLine);
+                    sLine = "";
+                }
+
+                file.Close();
+                System.Windows.Forms.MessageBox.Show("Dados exportados com sucesso.", "Program Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (System.Exception err)
+            {
+                System.Windows.Forms.MessageBox.Show(err.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                file.Close();
+            }
+        }
+        /*
+            /// <summary>
+            /// Não deletei esse método porque pretendo utilizá-lo para concluir a terceira tarefa, que será necessário exportar para um xls mesmo
+            /// </summary>
+            /// <param name="sender"></param>
+            /// <param name="e"></param>
+            private void exportarXLS()
+            {
+                //cria pasta na aplicacao para salvar localmente o arquivo excel
+                pastaExportarGrid = "ResumoNotasFiscais";
+                CriarDirectorio(pastaExportarGrid);
+
+                // Aplicação Excel
+                Excel.Application App; 
+                Excel.Workbook WorkBook; 
+                Excel.Worksheet WorkSheet; 
+                object misValor = System.Reflection.Missing.Value;
+
+                App = new Excel.Application();
+                WorkBook = App.Workbooks.Add(misValor);
+                WorkSheet = (Excel.Worksheet)WorkBook.Worksheets.get_Item(1);
+                int i = 0;
+                int j = 0;
+
+                // Passa as celulas do DataGridView para a Pasta do Excel
+                for (i = 0; i <= dataGridView3.RowCount - 1; i++)
+                {
+                    for (j = 0; j <= dataGridView3.ColumnCount - 1; j++)
+                    {
+                        DataGridViewCell cell = dataGridView2[j, i];
+                        WorkSheet.Cells[i + 1, j + 1] = cell.Value;
+                    }
+                }
+
+                //Gera um nome para novo arquivo
+                Random numAleatorio = new Random(); 
+                int valorInteiro = numAleatorio.Next();
+                DateTime dataHoje = DateTime.Today;
+                string data = dataHoje.ToString("D");
+                string nomeArquivo = "Extrato-" + data+ " "+valorInteiro+ ".xls";
+
+                //Pega caminho do arquivo criado, dentro da nova pasta criada na aplicação 
+                string CaminhoRaiz = System.Environment.CurrentDirectory; //Pasta debug
+                string[] pasta = { CaminhoRaiz, pastaExportarGrid, nomeArquivo};
+                string caminhoCompleto = Path.Combine(pasta); 
+
+                //salva localmente
+                WorkBook.SaveAs(caminhoCompleto, Excel.XlFileFormat.xlWorkbookNormal, misValor, misValor, misValor, misValor,
+
+                Excel.XlSaveAsAccessMode.xlExclusive, misValor, misValor, misValor, misValor, misValor);
+                WorkBook.Close(true, misValor, misValor);
+                App.Quit(); 
+
+                //Salva no dropbox
+                Dropbox(nomeArquivo, caminhoCompleto);
+
+            }
+       */
         private void mensagemSucesso()
         {
             MessageBox.Show("Arquivo salvo no dropbox");
