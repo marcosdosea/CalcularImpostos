@@ -16,5 +16,20 @@ namespace CalculaImposto
         {
             InitializeComponent();
         }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            panel2.Width += 3;
+            if (panel2.Width >= 790)
+            {
+                timer1.Stop();
+
+                TelaConfiguracao frm = new TelaConfiguracao();
+
+                frm.Show();
+
+                this.Hide();
+            }
+        }
     }
 }

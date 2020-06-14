@@ -40,3 +40,5 @@ C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\Ax
 C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\Interop.WMPLib.dll
 C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\AxInterop.WMPLib.dll
 C:\Users\barbi\source\repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.csproj.ResolveComReference.cache
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.TelaConfiguracao.resources
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.SplashForm.resources
