@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CalculaImposto
@@ -24,11 +17,26 @@ namespace CalculaImposto
             {
                 timer1.Stop();
 
-                TelaConfiguracao frm = new TelaConfiguracao();
+                string value = System.Configuration.ConfigurationManager.AppSettings["pastaDropbox"];
 
-                frm.Show();
+                //se app.config tiver o caminho do dropbox salvo
+                if ((value!="valor") || (value != null))
+                {
+                    FrmCalculaImposto frm = new FrmCalculaImposto();
 
-                this.Hide();
+                    frm.Show();
+
+                    this.Hide();
+                }
+                else
+                {
+
+                    TelaConfiguracao frm = new TelaConfiguracao();
+
+                    frm.Show();
+
+                    this.Hide();
+                }
             }
         }
     }

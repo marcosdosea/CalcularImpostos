@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CalculaImposto
@@ -19,25 +12,48 @@ namespace CalculaImposto
 
         private void button1_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog vistaFolderBrowserDialog = new FolderBrowserDialog();
-            vistaFolderBrowserDialog.RootFolder = Environment.SpecialFolder.Desktop;
-            vistaFolderBrowserDialog.Description = "Selecione o Dropbox";
-            vistaFolderBrowserDialog.ShowNewFolderButton = false;
+            FolderBrowserDialog fBDialog = new FolderBrowserDialog();
+            fBDialog.RootFolder = Environment.SpecialFolder.Desktop;
+            fBDialog.Description = "Selecione o Dropbox";
+            fBDialog.ShowNewFolderButton = false;
 
-            if (vistaFolderBrowserDialog.ShowDialog() == DialogResult.OK)
+            if (fBDialog.ShowDialog() == DialogResult.OK)
             {
-                textBox1.Text = vistaFolderBrowserDialog.SelectedPath;
+                textBox1.Text = fBDialog.SelectedPath;
             }
  
         }
 
-        private void btnProximo_Click(object sender, EventArgs e)
+        private void BtnProximo_Click(object sender, EventArgs e)
         {
-            FrmCalculaImposto frm = new FrmCalculaImposto();
+            try
+            {
+                //observar se realmente um caminho foi selecionado, caso sim
+                if (textBox1.Text !="")
+                {
+                    string pastaDropbox = textBox1.Text;
+                    //atualizar o app.config
+                    ConfiguracaoDropbox.UpdateAppSettings("pastaDropbox", pastaDropbox);
 
-            frm.Show();
+                    ConfiguracaoDropbox.UpdateAppConfig("appSettings", "value", pastaDropbox);
 
-            this.Hide();
+                    MessageBox.Show("Caminho do Dropbox salvo com sucesso!");
+                    //chama a interface calculaimposto
+                    FrmCalculaImposto frm = new FrmCalculaImposto();
+
+                    frm.Show();
+
+                    this.Hide();
+                }
+                else
+                {
+                    MessageBox.Show(String.Format("Selecione o caminho do dropbox primeiro!"));
+                }
+            } catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            
         }
     }
 }

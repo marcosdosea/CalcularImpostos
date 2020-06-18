@@ -77,7 +77,7 @@
             this.btnProximo.TabIndex = 3;
             this.btnProximo.Text = "Próximo";
             this.btnProximo.UseVisualStyleBackColor = false;
-            this.btnProximo.Click += new System.EventHandler(this.btnProximo_Click);
+            this.btnProximo.Click += new System.EventHandler(this.BtnProximo_Click);
             // 
             // TelaConfiguracao
             // 
