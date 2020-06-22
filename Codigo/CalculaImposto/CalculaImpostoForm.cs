@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -35,21 +36,48 @@ namespace CalculaImposto
 
         private void BtnBuscar_Click(object sender, EventArgs e)
         {
-            if (openFileDialogNfe.ShowDialog() == DialogResult.OK)
+            FolderBrowserDialog fBDialog = new FolderBrowserDialog();
+            fBDialog.RootFolder = Environment.SpecialFolder.Desktop;
+            fBDialog.Description = "Selecione o Dropbox";
+            fBDialog.ShowNewFolderButton = false;
+
+            if (fBDialog.ShowDialog() == DialogResult.OK)
             {
-                textBoxFile.Text = openFileDialogNfe.FileName;
+                textBoxFile.Text = fBDialog.SelectedPath;
+            }
+            try
+            {
+                //observar se realmente um caminho foi selecionado, caso sim
+                if (textBoxFile.Text != "")
+                {
+                    string pastaDropbox = textBoxFile.Text;
+                    //atualizar o app.config
+                    ConfiguracaoDropbox.UpdateAppSettings("pastaDropbox", pastaDropbox);
+
+                    ConfiguracaoDropbox.UpdateAppConfig("appSettings", "value", pastaDropbox);
+
+                    MessageBox.Show("Caminho do Dropbox salvo com sucesso!");
+                }
+                else
+                {
+                    MessageBox.Show(string.Format("Selecione o caminho do dropbox primeiro!"));
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void BtnBuscarNfe_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog() 
-            { 
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
                 Filter = "Arquivos | *.zip;*.xml",
                 DefaultExt = "zip",
                 RestoreDirectory = true
             };
-       
+
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 textBox1.Text = openFileDialog.FileName;
@@ -271,7 +299,7 @@ namespace CalculaImposto
         {
             try
             {
-             //   string[] arquivos = Directory.GetFiles(path, "*.xml");
+                //   string[] arquivos = Directory.GetFiles(path, "*.xml");
 
                 string[] arquivos = Directory.GetFiles(path); //não sei se apaga os arquivos dentro da pasta, se eles não forem xml
                 foreach (var file in arquivos)
@@ -358,7 +386,7 @@ namespace CalculaImposto
             {
                 XmlDocument doc = new XmlDocument();
                 doc.Load(pasta);
-                XmlNodeList elemList = doc.GetElementsByTagName("ICMS"); 
+                XmlNodeList elemList = doc.GetElementsByTagName("ICMS");
                 var recuperaItem = elemList.Item(pos);
 
                 foreach (XmlNode node in elemList)
@@ -377,6 +405,65 @@ namespace CalculaImposto
                 return null;
             }
         }
+        public string BuscaArquivoTxt()
+        {
+            try
+            {
+                string[] arquivos = Directory.GetFiles(value, "*.txt", SearchOption.AllDirectories);
+                string arquivo = " ";
+                string caminho = " ";
+                for (int i = arquivos.Length - 1; i >= 0; --i)
+                {
+                    arquivo = arquivos[i];
+                }
+                caminho = Path.GetFullPath(arquivo);
+                return caminho;
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Não foi possível encontrar o arquivo .txt no diretório. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+        public Tuple<string, string> LerArquivoTxt(string nomeArquivo, string ncm, string aliO, string aliD)
+        {
+            try
+            {
+                string valorMVA = " ";
+                string dataAtualizacao = " ";
+                string[] colunas;
+                Boolean proximalinha = true;
+                using (StreamReader leitor = File.OpenText(nomeArquivo))
+                {
+                    string[] linhas = leitor.ReadToEnd().Split('\n');
+                    foreach (var linha in linhas)
+                    {
+                        if (linha.StartsWith(ncm) && linha.Contains(aliO) && linha.Contains(aliD))
+                        {
+                            colunas = linha.Split(',');
+                            for (int i = 0; i <= colunas.Length; i++)
+                            {
+                                dataAtualizacao = colunas[3].Replace(',', ' ');
+                                valorMVA = colunas[4].Replace(',', ' ');
+                                proximalinha = false;
+                            }
+                        }
+                    }
+                    if (proximalinha == true)
+                    {
+                        dataAtualizacao = null;
+                        valorMVA = null;
+                    }
+                }
+                return new Tuple<string, string>(dataAtualizacao, valorMVA);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Não foi possível ler o arquivo Txt. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
         /// <summary>
         /// Cria um novo objeto do tipo Imposto. Cada nota Fiscal possui um ou vários produtos. Cada produto possui imposto. 
         /// </summary>
@@ -387,27 +474,35 @@ namespace CalculaImposto
         {
             try
             {
+                // checar se já existe um arquivo resumo nota fiscal salvo no dropbox local 
+                string recuperaArquivo = BuscaArquivoTxt();
 
                 Imposto imposto = new Imposto();
-
                 imposto.Numero = nfeProc.NFe.infNFe.ide.nNF;
-
                 imposto.NCM = nfeProc.NFe.infNFe.det[pos].prod.NCM;
                 imposto.Produto = nfeProc.NFe.infNFe.det[pos].prod.xProd; //peguei o nome
                 imposto.TipoReceita = nfeProc.NFe.infNFe.ide.natOp; //natureza operação?
-
-
                 imposto.AliquotaOrigem = Convert.ToDecimal(buscaAliquotaOrigem);
-
                 // aliD = "18" -> valor atual da alíquota de destino de sergipe;
-
                 imposto.AliquotaDestino = Convert.ToDecimal(string.Format("{0:p}", aliD));
 
-                //se o campo da datagriv mva for alterado, altera a dataAtualizacao, caso não, não faz nada! 
-                imposto.MVA = MVA;
-             
-                imposto.DataAtualizacaoMVA = dataAtualMVAFormatada;
-              
+                if (recuperaArquivo != null)
+                {
+                    var tupla = LerArquivoTxt(recuperaArquivo, imposto.NCM, buscaAliquotaOrigem, aliD);
+                    string mva = tupla.Item2;
+                    //se o campo da datagriv mva for alterado, altera a dataAtualizacao, caso não, não faz nada! 
+                    if (mva == null)
+                    {
+                        imposto.MVA = MVA;
+                        imposto.DataAtualizacaoMVA = dataAtualMVAFormatada;
+                    }
+                    else
+                    {
+                        imposto.DataAtualizacaoMVA = tupla.Item1;
+                        imposto.MVA = Convert.ToDecimal(tupla.Item2);
+                    }
+                }
+
                 return imposto;
             }
             catch (Exception ex)
@@ -416,7 +511,6 @@ namespace CalculaImposto
                 return null;
             }
         }
-        
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
             //Gera um nome para novo arquivo
@@ -440,7 +534,7 @@ namespace CalculaImposto
             }
             StreamWriter file = new StreamWriter(caminhoCompleto);
             try
-            {  
+            {
                 string sLine = "";
                 for (int i = 0; i <= dataGridView2.RowCount - 1; i++)
                 { //Crio um for do tamanho da quantidade de linhas existente
@@ -461,7 +555,7 @@ namespace CalculaImposto
                 MessageBox.Show(err.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 file.Close();
             }
-        }      
+        }
         /*
             /// <summary>
             /// Não deletei esse método porque pretendo utilizá-lo para concluir a terceira tarefa, que será necessário exportar para um xls mesmo
@@ -527,7 +621,7 @@ namespace CalculaImposto
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void dataGridView2_CellEndEdit(
-        object sender, DataGridViewCellEventArgs e)
+object sender, DataGridViewCellEventArgs e)
         {
             // dataAtualizacaoMVA = DateTime.Today;
             try
@@ -561,10 +655,11 @@ namespace CalculaImposto
                     {
                         MessageBox.Show(String.Format("Valor alterado com sucesso! Novo valor de aliquota destino: {0}", aliD));
                     }
-                } else if (e.ColumnIndex.Equals(7)) //se o dado alterado for na coluna 7, MVA
+                }
+                else if (e.ColumnIndex.Equals(7)) //se o dado alterado for na coluna 7, MVA
                 {
                     decimal valor = Convert.ToDecimal(valorAlteradoGrid);
-                    if (valor !=MVA)
+                    if (valor != MVA)
                     {
                         //produtos com mesmo ncm E ORIGEM, seta de uma vez o MESMO MVA
                         MVA = Convert.ToDecimal(valorAlteradoGrid);
@@ -590,8 +685,8 @@ namespace CalculaImposto
                             if (dataGridView2.Columns.Count > 0)
                             { // Checa se eu tenho pelo menos uma coluna.
                                 dataGridView2.Columns[7].Selected = true;
-                             //   dataGridView2.Columns[1].Selected = true; //NCM
-                             //   dataGridView2.Columns[4].Selected = true; //ORIGEM
+                                //   dataGridView2.Columns[1].Selected = true; //NCM
+                                //   dataGridView2.Columns[4].Selected = true; //ORIGEM
                             }
                             for (int i = 0; i < dataGridView2.RowCount; i++)
                             { //Crio um for do tamanho da quantidade de linhas existente

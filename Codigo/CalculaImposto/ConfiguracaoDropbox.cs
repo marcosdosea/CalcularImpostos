@@ -12,7 +12,7 @@ namespace CalculaImposto
 
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
-            string value = System.Configuration.ConfigurationManager.AppSettings[chave];
+         //   string value = System.Configuration.ConfigurationManager.AppSettings[chave];
            
             config.AppSettings.Settings.Remove(chave);
 
