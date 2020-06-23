@@ -35,7 +35,7 @@ namespace CalculaImposto
                     //atualizar o app.config
                     ConfiguracaoDropbox.UpdateAppSettings("pastaDropbox", pastaDropbox);
 
-                    ConfiguracaoDropbox.UpdateAppConfig("appSettings", "value", pastaDropbox);
+                  //  ConfiguracaoDropbox.UpdateAppConfig("appSettings", "value", pastaDropbox);
 
                     MessageBox.Show("Caminho do Dropbox salvo com sucesso!");
                     //chama a interface calculaimposto

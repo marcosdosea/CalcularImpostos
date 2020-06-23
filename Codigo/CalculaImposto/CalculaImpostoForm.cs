@@ -27,7 +27,7 @@ namespace CalculaImposto
 
         private decimal MVA;
 
-        private string value = ConfigurationManager.AppSettings["pastaDropbox".ToString()]; //recupero pasta do dropbox
+        private string value = ConfiguracaoDropbox.GetValue("pastaDropbox");
 
         public FrmCalculaImposto()
         {
@@ -48,13 +48,11 @@ namespace CalculaImposto
             try
             {
                 //observar se realmente um caminho foi selecionado, caso sim
-                if (textBoxFile.Text != "")
+                if (textBoxFile.Text != " ")
                 {
                     string pastaDropbox = textBoxFile.Text;
                     //atualizar o app.config
                     ConfiguracaoDropbox.UpdateAppSettings("pastaDropbox", pastaDropbox);
-
-                    ConfiguracaoDropbox.UpdateAppConfig("appSettings", "value", pastaDropbox);
 
                     MessageBox.Show("Caminho do Dropbox salvo com sucesso!");
                 }
@@ -409,7 +407,7 @@ namespace CalculaImposto
         {
             try
             {
-                string[] arquivos = Directory.GetFiles(value, "*.txt", SearchOption.AllDirectories);
+                string[] arquivos = Directory.GetFiles(value, "ResumoNotasFiscais.txt", SearchOption.AllDirectories);
                 string arquivo = " ";
                 string caminho = " ";
                 for (int i = arquivos.Length - 1; i >= 0; --i)
@@ -513,12 +511,7 @@ namespace CalculaImposto
         }
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
-            //Gera um nome para novo arquivo
-            Random numAleatorio = new Random();
-            int valorInteiro = numAleatorio.Next();
-            DateTime dataHoje = DateTime.Today;
-            string data = dataHoje.ToString("D");
-            string nomeArquivo = "ResumoNotasFiscais-" + data + " " + valorInteiro + ".txt";
+            string nomeArquivo = "ResumoNotasFiscais.txt";
             string caminhoCompleto = "";
             try
             {
@@ -717,5 +710,15 @@ object sender, DataGridViewCellEventArgs e)
             }
         }
         #endregion
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            DialogResult escolha = MessageBox.Show("Tem certeza que deseja sair?", "Mensagem do Sistema", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (escolha == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
+        }
     }
 }

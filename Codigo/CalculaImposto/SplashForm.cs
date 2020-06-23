@@ -17,7 +17,7 @@ namespace CalculaImposto
             {
                 timer1.Stop();
 
-                string value = System.Configuration.ConfigurationManager.AppSettings["pastaDropbox"];
+                string value = ConfiguracaoDropbox.GetValue("pastaDropbox");
 
                 //se app.config tiver o caminho do dropbox salvo
                 if ((value!="valor") || (value != null))
