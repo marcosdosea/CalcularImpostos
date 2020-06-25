@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
 using System.Windows.Forms;
 using System.Xml;
-using Dropbox.Api;
-using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CalculaImposto
 {
@@ -17,8 +17,6 @@ namespace CalculaImposto
 
         private string subdiretorio;
 
-        private string pastaExportarGrid;
-
         private string dataAtualMVAFormatada;
 
         private string buscaAliquotaOrigem;
@@ -28,6 +26,9 @@ namespace CalculaImposto
         private DateTime dataAtualizacaoMVA;
 
         private decimal MVA;
+
+        private string value = ConfiguracaoDropbox.GetValue("pastaDropbox");
+
         public FrmCalculaImposto()
         {
             InitializeComponent();
@@ -35,21 +36,46 @@ namespace CalculaImposto
 
         private void BtnBuscar_Click(object sender, EventArgs e)
         {
-            if (openFileDialogNfe.ShowDialog() == DialogResult.OK)
+            FolderBrowserDialog fBDialog = new FolderBrowserDialog();
+            fBDialog.RootFolder = Environment.SpecialFolder.Desktop;
+            fBDialog.Description = "Selecione o Dropbox";
+            fBDialog.ShowNewFolderButton = false;
+
+            if (fBDialog.ShowDialog() == DialogResult.OK)
             {
-                textBoxFile.Text = openFileDialogNfe.FileName;
+                textBoxFile.Text = fBDialog.SelectedPath;
+            }
+            try
+            {
+                //observar se realmente um caminho foi selecionado, caso sim
+                if (textBoxFile.Text != " ")
+                {
+                    string pastaDropbox = textBoxFile.Text;
+                    //atualizar o app.config
+                    ConfiguracaoDropbox.UpdateAppSettings("pastaDropbox", pastaDropbox);
+
+                    MessageBox.Show("Caminho do Dropbox salvo com sucesso!");
+                }
+                else
+                {
+                    MessageBox.Show(string.Format("Selecione o caminho do dropbox primeiro!"));
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void BtnBuscarNfe_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog() 
-            { 
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
                 Filter = "Arquivos | *.zip;*.xml",
                 DefaultExt = "zip",
                 RestoreDirectory = true
             };
-       
+
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 textBox1.Text = openFileDialog.FileName;
@@ -257,7 +283,7 @@ namespace CalculaImposto
                 string[] fileEntries = Directory.GetFiles(path);
                 foreach (string fileName in fileEntries)
                 {
-                    ApagarArquivo(path); //adicionei esse parãmetro aqui
+                    ApagarArquivo(path); //adicionei esse parametro aqui
                 }
                 Directory.Delete(path, true);
             }
@@ -267,11 +293,11 @@ namespace CalculaImposto
             }
         }
 
-        private void ApagarArquivo(string path) //coloquei esse parãmetro path
+        private void ApagarArquivo(string path) //coloquei esse parâmetro path
         {
             try
             {
-             //   string[] arquivos = Directory.GetFiles(path, "*.xml");
+                //   string[] arquivos = Directory.GetFiles(path, "*.xml");
 
                 string[] arquivos = Directory.GetFiles(path); //não sei se apaga os arquivos dentro da pasta, se eles não forem xml
                 foreach (var file in arquivos)
@@ -358,7 +384,7 @@ namespace CalculaImposto
             {
                 XmlDocument doc = new XmlDocument();
                 doc.Load(pasta);
-                XmlNodeList elemList = doc.GetElementsByTagName("ICMS"); 
+                XmlNodeList elemList = doc.GetElementsByTagName("ICMS");
                 var recuperaItem = elemList.Item(pos);
 
                 foreach (XmlNode node in elemList)
@@ -373,7 +399,66 @@ namespace CalculaImposto
             }
             catch (Exception ex)
             {
-                MessageBox.Show(String.Format("Não foi possível obter aliquota de origem. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format("Não foi possível obter aliquota de origem. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+        public string BuscaArquivoTxt()
+        {
+            try
+            {
+                string[] arquivos = Directory.GetFiles(value, "ResumoNotasFiscais.txt", SearchOption.AllDirectories);
+                string arquivo = " ";
+                string caminho = " ";
+                for (int i = arquivos.Length - 1; i >= 0; --i)
+                {
+                    arquivo = arquivos[i];
+                }
+                caminho = Path.GetFullPath(arquivo);
+                return caminho;
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Não foi possível encontrar o arquivo .txt no diretório. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+        public Tuple<string, string> LerArquivoTxt(string nomeArquivo, string ncm, string aliO, string aliD)
+        {
+            try
+            {
+                string valorMVA = " ";
+                string dataAtualizacao = " ";
+                string[] colunas;
+                Boolean proximalinha = true;
+                using (StreamReader leitor = File.OpenText(nomeArquivo))
+                {
+                    string[] linhas = leitor.ReadToEnd().Split('\n');
+                    foreach (var linha in linhas)
+                    {
+                        if (linha.StartsWith(ncm) && linha.Contains(aliO) && linha.Contains(aliD))
+                        {
+                            colunas = linha.Split(',');
+                            for (int i = 0; i <= colunas.Length; i++)
+                            {
+                                dataAtualizacao = colunas[3].Replace(',', ' ');
+                                valorMVA = colunas[4].Replace(',', ' ');
+                                proximalinha = false;
+                            }
+                        }
+                    }
+                    if (proximalinha == true)
+                    {
+                        dataAtualizacao = null;
+                        valorMVA = null;
+                    }
+                }
+                return new Tuple<string, string>(dataAtualizacao, valorMVA);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Não foi possível ler o arquivo Txt. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
         }
@@ -387,109 +472,141 @@ namespace CalculaImposto
         {
             try
             {
+                // checar se já existe um arquivo resumo nota fiscal salvo no dropbox local 
+                string recuperaArquivo = BuscaArquivoTxt();
 
                 Imposto imposto = new Imposto();
-
                 imposto.Numero = nfeProc.NFe.infNFe.ide.nNF;
-
                 imposto.NCM = nfeProc.NFe.infNFe.det[pos].prod.NCM;
                 imposto.Produto = nfeProc.NFe.infNFe.det[pos].prod.xProd; //peguei o nome
                 imposto.TipoReceita = nfeProc.NFe.infNFe.ide.natOp; //natureza operação?
-
-
                 imposto.AliquotaOrigem = Convert.ToDecimal(buscaAliquotaOrigem);
-
                 // aliD = "18" -> valor atual da alíquota de destino de sergipe;
+                imposto.AliquotaDestino = Convert.ToDecimal(string.Format("{0:p}", aliD));
 
-                imposto.AliquotaDestino = Convert.ToDecimal(String.Format("{0:p}", aliD));
+                if (recuperaArquivo != null)
+                {
+                    var tupla = LerArquivoTxt(recuperaArquivo, imposto.NCM, buscaAliquotaOrigem, aliD);
+                    string mva = tupla.Item2;
+                    //se o campo da datagriv mva for alterado, altera a dataAtualizacao, caso não, não faz nada! 
+                    if (mva == null)
+                    {
+                        imposto.MVA = MVA;
+                        imposto.DataAtualizacaoMVA = dataAtualMVAFormatada;
+                    }
+                    else
+                    {
+                        imposto.DataAtualizacaoMVA = tupla.Item1;
+                        imposto.MVA = Convert.ToDecimal(tupla.Item2);
+                    }
+                }
 
-                //se o campo da datagriv mva for alterado, altera a dataAtualizacao, caso não, não faz nada! observação importante
-                imposto.MVA = MVA;
-             
-                imposto.DataAtualizacaoMVA = dataAtualMVAFormatada;
-              
                 return imposto;
             }
             catch (Exception ex)
             {
-                MessageBox.Show(String.Format("Não foi possível criar o objeto Imposto. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format("Não foi possível criar o objeto Imposto. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
         }
-        /// <summary>
-        /// Salva documento "*.xls" no dropbox, conta `saomarcosmateriais@gmail.com`
-        /// </summary>
-        /// <param name="nomeArquivo">Nome do arquivo exportado da grid com a extensão "*.xls"</param>
-        /// <param name="caminhoCompleto">Caminho completo do diretório até chegar ao arquivo exportado da grid, com sua extensão "*.xls"</param>
-        private void Dropbox(string nomeArquivo, string caminhoCompleto)
+        private void BtnSalvar_Click(object sender, EventArgs e)
         {
-            //o token está expirando... 
-            DropboxApi.DropboxApi dropbox = new DropboxApi.DropboxApi();
-            _ = dropbox.Upload(new DropboxClient("qiPNSnvudfAAAAAAAAAAFd3eYqmhfFFlV8E6SjIc2EdWtYGOJsiehCsE8VAc62jz"), "/ResumoNotasFiscais",
-             nomeArquivo, caminhoCompleto);
-            mensagemSucesso();
-        }
-        /// <summary>
-        /// Exporta a segunda grid para o formato "*.xls", salva o arquivo localmente em uma pasta gerada e chama o método Dropbox.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnSalvar_Click(object sender, EventArgs e)
-        {
-            //cria pasta na aplicacao para salvar localmente o arquivo excel
-            pastaExportarGrid = "ResumoNotasFiscais";
-            CriarDirectorio(pastaExportarGrid);
-
-            // Aplicação Excel
-            Excel.Application App; 
-            Excel.Workbook WorkBook; 
-            Excel.Worksheet WorkSheet; 
-            object misValor = System.Reflection.Missing.Value;
-
-            App = new Excel.Application();
-            WorkBook = App.Workbooks.Add(misValor);
-            WorkSheet = (Excel.Worksheet)WorkBook.Worksheets.get_Item(1);
-            int i = 0;
-            int j = 0;
-
-            // Passa as celulas do DataGridView para a Pasta do Excel
-            for (i = 0; i <= dataGridView2.RowCount - 1; i++)
+            string nomeArquivo = "ResumoNotasFiscais.txt";
+            string caminhoCompleto = "";
+            try
             {
-                for (j = 0; j <= dataGridView2.ColumnCount - 1; j++)
-                {
-                    DataGridViewCell cell = dataGridView2[j, i];
-                    WorkSheet.Cells[i + 1, j + 1] = cell.Value;
-                }
+                caminhoCompleto = Path.Combine(value, nomeArquivo);
             }
-          
-            //Gera um nome para novo arquivo
-            Random numAleatorio = new Random(); 
-            int valorInteiro = numAleatorio.Next();
-            DateTime dataHoje = DateTime.Today;
-            string data = dataHoje.ToString("D");
-            string nomeArquivo = "ResumoNotasFiscais-" + data+ " "+valorInteiro+ ".xls";
-            
-            //Pega caminho do arquivo criado, dentro da nova pasta criada na aplicação 
-            string CaminhoRaiz = System.Environment.CurrentDirectory; //Pasta debug
-            string[] pasta = { CaminhoRaiz, pastaExportarGrid, nomeArquivo};
-            string caminhoCompleto = Path.Combine(pasta); 
-
-            //salva localmente
-            WorkBook.SaveAs(caminhoCompleto, Excel.XlFileFormat.xlWorkbookNormal, misValor, misValor, misValor, misValor,
-
-            Excel.XlSaveAsAccessMode.xlExclusive, misValor, misValor, misValor, misValor, misValor);
-            WorkBook.Close(true, misValor, misValor);
-            App.Quit(); 
-
-            //Salva no dropbox
-            Dropbox(nomeArquivo, caminhoCompleto);
-
+            catch (Exception ex)
+            {
+                if (value == null)
+                    value = "null";
+                if (nomeArquivo == null)
+                    nomeArquivo = "null";
+                MessageBox.Show(string.Format("Você não pode combinar '{0}' e '{1}' porque: {2}{3}", value, nomeArquivo, Environment.NewLine, ex.Message));
+            }
+            StreamWriter file = new StreamWriter(caminhoCompleto);
+            try
+            {
+                string sLine = "";
+                for (int i = 0; i <= dataGridView2.RowCount - 1; i++)
+                { //Crio um for do tamanho da quantidade de linhas existente
+                    sLine = sLine + dataGridView2.Rows[i].Cells[1].Value + ","  //PEGAR O ncm      
+                    + dataGridView2.Rows[i].Cells[4].Value + ","//PEGAR a aliquota de origem 
+                    + dataGridView2.Rows[i].Cells[5].Value + "," //PEGAR a aliquota de destino  
+                    + dataGridView2.Rows[i].Cells[6].Value + ","//PEGAR a data de atualizacao  
+                    + dataGridView2.Rows[i].Cells[7].Value;//PEGAR o mva
+                    sLine = sLine + ",";
+                    file.WriteLine(sLine);
+                    sLine = "";
+                }
+                file.Close();
+                MessageBox.Show("Dados exportados com sucesso.", "Program Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                file.Close();
+            }
         }
-        
-        private void mensagemSucesso()
-        {
-            MessageBox.Show("Arquivo salvo no dropbox");
-        }
+        /*
+            /// <summary>
+            /// Não deletei esse método porque pretendo utilizá-lo para concluir a terceira tarefa, que será necessário exportar para um xls mesmo
+            /// </summary>
+            /// <param name="sender"></param>
+            /// <param name="e"></param>
+            private void exportarXLS()
+            {
+                //cria pasta na aplicacao para salvar localmente o arquivo excel
+                pastaExportarGrid = "ResumoNotasFiscais";
+                CriarDirectorio(pastaExportarGrid);
+
+                // Aplicação Excel
+                Excel.Application App; 
+                Excel.Workbook WorkBook; 
+                Excel.Worksheet WorkSheet; 
+                object misValor = System.Reflection.Missing.Value;
+
+                App = new Excel.Application();
+                WorkBook = App.Workbooks.Add(misValor);
+                WorkSheet = (Excel.Worksheet)WorkBook.Worksheets.get_Item(1);
+                int i = 0;
+                int j = 0;
+
+                // Passa as celulas do DataGridView para a Pasta do Excel
+                for (i = 0; i <= dataGridView3.RowCount - 1; i++)
+                {
+                    for (j = 0; j <= dataGridView3.ColumnCount - 1; j++)
+                    {
+                        DataGridViewCell cell = dataGridView2[j, i];
+                        WorkSheet.Cells[i + 1, j + 1] = cell.Value;
+                    }
+                }
+
+                //Gera um nome para novo arquivo
+                Random numAleatorio = new Random(); 
+                int valorInteiro = numAleatorio.Next();
+                DateTime dataHoje = DateTime.Today;
+                string data = dataHoje.ToString("D");
+                string nomeArquivo = "Extrato-" + data+ " "+valorInteiro+ ".xls";
+
+                //Pega caminho do arquivo criado, dentro da nova pasta criada na aplicação 
+                string CaminhoRaiz = System.Environment.CurrentDirectory; //Pasta debug
+                string[] pasta = { CaminhoRaiz, pastaExportarGrid, nomeArquivo};
+                string caminhoCompleto = Path.Combine(pasta); 
+
+                //salva localmente
+                WorkBook.SaveAs(caminhoCompleto, Excel.XlFileFormat.xlWorkbookNormal, misValor, misValor, misValor, misValor,
+
+                Excel.XlSaveAsAccessMode.xlExclusive, misValor, misValor, misValor, misValor, misValor);
+                WorkBook.Close(true, misValor, misValor);
+                App.Quit(); 
+
+                //Salva no dropbox
+                Dropbox(nomeArquivo, caminhoCompleto);
+
+            }
+       */
         /// <summary>
         /// Pega a célula de aliquota de destino, editada na grid pelo contador e atualizar seu valor. 
         /// Pergunta se deseja atualizar toda a coluna de alíquota Destino para esse valor.
@@ -497,7 +614,7 @@ namespace CalculaImposto
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void dataGridView2_CellEndEdit(
-        object sender, DataGridViewCellEventArgs e)
+object sender, DataGridViewCellEventArgs e)
         {
             // dataAtualizacaoMVA = DateTime.Today;
             try
@@ -531,10 +648,11 @@ namespace CalculaImposto
                     {
                         MessageBox.Show(String.Format("Valor alterado com sucesso! Novo valor de aliquota destino: {0}", aliD));
                     }
-                } else if (e.ColumnIndex.Equals(7)) //se o dado alterado for na coluna 7, MVA
+                }
+                else if (e.ColumnIndex.Equals(7)) //se o dado alterado for na coluna 7, MVA
                 {
                     decimal valor = Convert.ToDecimal(valorAlteradoGrid);
-                    if (valor !=MVA)
+                    if (valor != MVA)
                     {
                         //produtos com mesmo ncm E ORIGEM, seta de uma vez o MESMO MVA
                         MVA = Convert.ToDecimal(valorAlteradoGrid);
@@ -560,8 +678,8 @@ namespace CalculaImposto
                             if (dataGridView2.Columns.Count > 0)
                             { // Checa se eu tenho pelo menos uma coluna.
                                 dataGridView2.Columns[7].Selected = true;
-                             //   dataGridView2.Columns[1].Selected = true; //NCM
-                             //   dataGridView2.Columns[4].Selected = true; //ORIGEM
+                                //   dataGridView2.Columns[1].Selected = true; //NCM
+                                //   dataGridView2.Columns[4].Selected = true; //ORIGEM
                             }
                             for (int i = 0; i < dataGridView2.RowCount; i++)
                             { //Crio um for do tamanho da quantidade de linhas existente
@@ -592,5 +710,15 @@ namespace CalculaImposto
             }
         }
         #endregion
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            DialogResult escolha = MessageBox.Show("Tem certeza que deseja sair?", "Mensagem do Sistema", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (escolha == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
+        }
     }
 }
