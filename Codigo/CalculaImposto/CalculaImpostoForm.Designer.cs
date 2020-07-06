@@ -66,6 +66,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this.openFileDialogNfe = new System.Windows.Forms.OpenFileDialog();
             this.button1 = new System.Windows.Forms.Button();
+            this.btnExportar = new System.Windows.Forms.Button();
+            this.btnGerarExtrato = new System.Windows.Forms.Button();
             this.numeroDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.fornecedorDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataEmissaoDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -439,6 +441,26 @@
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // btnExportar
+            // 
+            this.btnExportar.Location = new System.Drawing.Point(625, 1);
+            this.btnExportar.Name = "btnExportar";
+            this.btnExportar.Size = new System.Drawing.Size(75, 23);
+            this.btnExportar.TabIndex = 7;
+            this.btnExportar.Text = "Exportar ";
+            this.btnExportar.UseVisualStyleBackColor = true;
+            this.btnExportar.Click += new System.EventHandler(this.btnExportar_Click);
+            // 
+            // btnGerarExtrato
+            // 
+            this.btnGerarExtrato.Location = new System.Drawing.Point(533, 1);
+            this.btnGerarExtrato.Name = "btnGerarExtrato";
+            this.btnGerarExtrato.Size = new System.Drawing.Size(86, 23);
+            this.btnGerarExtrato.TabIndex = 8;
+            this.btnGerarExtrato.Text = "Gerar Extrato";
+            this.btnGerarExtrato.UseVisualStyleBackColor = true;
+            this.btnGerarExtrato.Click += new System.EventHandler(this.btnGerarExtrato_Click);
+            // 
             // numeroDataGridViewTextBoxColumn
             // 
             this.numeroDataGridViewTextBoxColumn.DataPropertyName = "Numero";
@@ -568,6 +590,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.ClientSize = new System.Drawing.Size(774, 438);
+            this.Controls.Add(this.btnGerarExtrato);
+            this.Controls.Add(this.btnExportar);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
@@ -634,6 +658,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn DataAtualizacaoMVA;
         private System.Windows.Forms.DataGridViewTextBoxColumn mVADataGridViewTextBoxColumn;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnExportar;
+        private System.Windows.Forms.Button btnGerarExtrato;
     }
 }
 

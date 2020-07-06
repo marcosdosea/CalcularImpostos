@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
+using Excel = Microsoft.Office.Interop.Excel;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -27,7 +27,15 @@ namespace CalculaImposto
 
         private decimal MVA;
 
+        private TNfeProc notaFiscalDesserializada;
+
+        private decimal somaValor = 0;
+
         private string value = ConfiguracaoDropbox.GetValue("pastaDropbox");
+
+        private string pIPI;
+
+        private string valorProdutoUnitario;
 
         public FrmCalculaImposto()
         {
@@ -221,6 +229,7 @@ namespace CalculaImposto
                 TNfeProc nfe;
                 NotasFiscais novaNota;
                 Imposto imposto;
+               // string pIPI;
                 int quantidadeProdutosNotaF = ContaItensNotaFiscal(caminho);
                 int pos = 0;
                 List<Imposto> impostoList = new List<Imposto>();
@@ -232,9 +241,15 @@ namespace CalculaImposto
 
                 nfe = gerenciadorNfe.LerNFE(arquivo);
 
+                notaFiscalDesserializada = nfe;
+
                 novaNota = NovoObjeto(nfe);
 
                 buscaAliquotaOrigem = RetornaAliquotaOrigemICMS(caminho, pos);
+
+                pIPI = RetornaIPI(caminho, pos);
+
+                valorProdutoUnitario = RetornaValorProdutoUnitario(caminho, pos);
 
                 for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
                 {
@@ -720,5 +735,206 @@ object sender, DataGridViewCellEventArgs e)
                 Application.Exit();
             }
         }
+        #region Tarefa 3 - Terceira Grid
+        private void btnExportar_Click(object sender, EventArgs e)
+        {
+            // Aplicação Excel
+            Excel.Application App;
+            Excel.Workbook WorkBook;
+            Excel.Worksheet WorkSheet;
+            object misValor = System.Reflection.Missing.Value;
+
+            App = new Excel.Application();
+            WorkBook = App.Workbooks.Add(misValor);
+            WorkSheet = (Excel.Worksheet)WorkBook.Worksheets.get_Item(1);
+            int i = 0;
+            int j = 0;
+
+            // Passa as celulas do DataGridView para a Pasta do Excel
+            for (i = 0; i <= dataGridView3.RowCount - 1; i++)
+            {
+                for (j = 0; j <= dataGridView3.ColumnCount - 1; j++)
+                {
+                    DataGridViewCell cell = dataGridView3[j, i];
+                    WorkSheet.Cells[i + 1, j + 1] = cell.Value;
+                }
+            }
+
+            //Gera um nome para novo arquivo
+            Random numAleatorio = new Random();
+            int valorInteiro = numAleatorio.Next();
+            DateTime dataHoje = DateTime.Today;
+            string data = dataHoje.ToString("D");
+            string nomeArquivo = "Extrato-" + data + " " + valorInteiro + ".xls";
+
+            //Pega caminho do arquivo criado, dentro da nova pasta criada na aplicação 
+            // string CaminhoRaiz = System.Environment.CurrentDirectory; //Pasta debug
+            string[] pasta = { value, nomeArquivo };
+            string caminhoCompleto = Path.Combine(pasta);
+
+            //salva localmente
+            WorkBook.SaveAs(caminhoCompleto, Excel.XlFileFormat.xlWorkbookNormal, misValor, misValor, misValor, misValor,
+
+            Excel.XlSaveAsAccessMode.xlExclusive, misValor, misValor, misValor, misValor, misValor);
+            WorkBook.Close(true, misValor, misValor);
+            App.Quit();
+
+            //Salva no dropbox
+            // Dropbox(nomeArquivo, caminhoCompleto);
+        }
+
+        private void btnGerarExtrato_Click(object sender, EventArgs e)
+        {
+            ExtratoImposto extrato;
+            CalculaIcmsAntecipado icmsAntecipado;
+            int linha = 0;
+            List<ExtratoImposto> extratoList = new List<ExtratoImposto>();
+            for (int i = 0; i <= dataGridView2.Rows.Count - 1; i++) //percorre todas as linhas da segunda grid
+            {
+                //vai chamar esse método para cada linha da datagridview2
+                icmsAntecipado = new CalculaIcmsAntecipado();
+            //    valorProdutoUnitario = RetornaValorProdutoUnitario(caminho, pos); ->>>>>>>>>>>>>>>>>> chamo aqui ou em processar Arquivo
+                var tupla = DadosSegundaGridParaCalculoIcms(linha, notaFiscalDesserializada);
+                string ncm = tupla.Item1; // é necessário mesmo o ncm?
+                string aliO = tupla.Item2;
+                string mva = tupla.Item3;
+                string valorProduto = tupla.Item4; //ver se realmente está pegando o valor do produto
+                //NÃO ESTÁ PASSANDO O CAMINHO DO ARQUIVOOOOOOOOOOOOOOOO
+                decimal precoGoverno = icmsAntecipado.CalculaPrecoGoverno(Convert.ToDecimal(mva), pIPI, i, Convert.ToDecimal(valorProduto));
+                somaValor = somaValor + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(aliO));
+             //   linha++; //retorno do cálculo está negativo 
+                         //formatar células da grid
+                extrato = ExtratoGrid(notaFiscalDesserializada);
+                extratoList.Add(extrato);
+
+                this.extratoImpostoBindingSource.DataSource = extratoList;
+
+                this.dataGridView3.DataSource =
+                    this.extratoImpostoBindingSource.DataSource;
+            }
+        }
+        public Tuple<string, string, string, string> DadosSegundaGridParaCalculoIcms(int pos, TNfeProc nfe)
+        {
+            try
+            {
+                string ncm = "";
+                string aliO = "";
+                string mva = "";
+                // TNfeProc nfe = new TNfeProc(); //deu nulo porque eu não passei a nota fiscal, não está lendo nenhuma nota
+             //   string valorProduto = "";
+                string nomeProduto = "";
+                //  for (int i = 0; i <= dataGridView2.RowCount; i++)
+                //  { //Crio um for do tamanho da quantidade de linhas existente
+
+                ncm = dataGridView2.Rows[pos].Cells[1].Value.ToString();//PEGAR O ncm 
+                aliO = dataGridView2.Rows[pos].Cells[4].Value.ToString();//PEGAR a aliquota de origem 
+                mva = dataGridView2.Rows[pos].Cells[7].Value.ToString();//PEGAR o mva     
+                nomeProduto = dataGridView2.Rows[pos].Cells[2].Value.ToString();
+              //  if (nfe.NFe.infNFe.det[pos].prod.xProd.Equals(nomeProduto)) //acho que não está pegando o valor do produto... olhar isso aqui
+              //  {
+
+             //       valorProduto = nfe.NFe.infNFe.det[pos].prod.vProd; //pega ValorProduto
+              //  }
+         //       RetornaValorProdutoUnitario(caminho,pos);
+                //  }
+                return new Tuple<string, string, string, string>(ncm, aliO, mva, valorProdutoUnitario);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Não foi possível recuperar os dados da segunda grid para o extrato. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+
+        }
+        public ExtratoImposto ExtratoGrid(TNfeProc nfe)
+        {
+            try
+            {
+                ExtratoImposto extrato = new ExtratoImposto();
+                extrato.NumeroNota = nfe.NFe.infNFe.ide.nNF;
+                //    extrato.Diferenca =
+                //    extrato.FormaRecolhimento =
+                //    extrato.ValorAnalisado =
+                //    extrato.ValorRecolher =
+                extrato.ValorTotalNota = Convert.ToDecimal(nfe.NFe.infNFe.cobr.fat.vLiq);
+
+                extrato.ValorICMSCalculado = somaValor; //só quando somar todos os valores gerados!
+                return extrato;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Não foi possível criar o extrato. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+        public string RetornaValorProdutoUnitario(string pasta, int pos)
+        {
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.Load(pasta);
+                XmlNodeList elemList = doc.GetElementsByTagName("Prod");
+                var recuperaItem = elemList.Item(pos);
+                string format = "";
+
+                foreach (XmlNode node in elemList)
+                {
+                    XmlNodeList ali = doc.GetElementsByTagName("vProd");
+                    recuperaItem = ali.Item(pos);
+                }
+                if (recuperaItem == null)
+                {
+                    //se o produto não tiver o pIPI
+                    return null;
+                }
+                else
+                {
+                    format = recuperaItem.OuterXml;
+                    format = format.Replace("<vProd xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
+                    format = format.Replace("</vProd>", "");
+                    return format;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Não foi possível retornar o valor do produto unitário. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+        public string RetornaIPI(string pasta, int pos)
+        {
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.Load(pasta);
+                XmlNodeList elemList = doc.GetElementsByTagName("IPI");
+                var recuperaItem = elemList.Item(pos);
+                string format = "";
+
+                foreach (XmlNode node in elemList)
+                {
+                    XmlNodeList ali = doc.GetElementsByTagName("pIPI");
+                    recuperaItem = ali.Item(pos);
+                }
+                if (recuperaItem == null)
+                {
+                    //se o produto não tiver o pIPI
+                    return null;
+                }
+                else
+                {
+                    format = recuperaItem.OuterXml;
+                    format = format.Replace("<pIPI xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
+                    format = format.Replace("</pIPI>", "");
+                    return format;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Não foi possível retornar o IPI. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+        #endregion
     }
 }
