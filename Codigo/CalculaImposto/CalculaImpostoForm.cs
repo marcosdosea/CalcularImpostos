@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.IO.Compression;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -11,6 +10,7 @@ namespace CalculaImposto
 {
     public partial class FrmCalculaImposto : Form
     {
+        #region variáveis 
         private string caminho;
 
         private string pastaSaida;
@@ -27,16 +27,16 @@ namespace CalculaImposto
 
         private decimal MVA;
 
-        private TNfeProc notaFiscalDesserializada;
-
-        private decimal somaValor = 0;
-
         private string value = ConfiguracaoDropbox.GetValue("pastaDropbox");
 
         private string pIPI;
 
         private string valorProdutoUnitario;
 
+        private string valorICMSOrigem;
+
+        private decimal precoGoverno;
+        #endregion
         public FrmCalculaImposto()
         {
             InitializeComponent();
@@ -52,26 +52,17 @@ namespace CalculaImposto
             if (fBDialog.ShowDialog() == DialogResult.OK)
             {
                 textBoxFile.Text = fBDialog.SelectedPath;
-            }
-            try
-            {
-                //observar se realmente um caminho foi selecionado, caso sim
-                if (textBoxFile.Text != " ")
-                {
-                    string pastaDropbox = textBoxFile.Text;
-                    //atualizar o app.config
-                    ConfiguracaoDropbox.UpdateAppSettings("pastaDropbox", pastaDropbox);
 
-                    MessageBox.Show("Caminho do Dropbox salvo com sucesso!");
-                }
-                else
-                {
-                    MessageBox.Show(string.Format("Selecione o caminho do dropbox primeiro!"));
-                }
+                string pastaDropbox = textBoxFile.Text;
+                //atualizar o app.config
+                ConfiguracaoDropbox.UpdateAppSettings("pastaDropbox", pastaDropbox);
+
+                MessageBox.Show("Caminho do Dropbox salvo com sucesso!");
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show(string.Format("Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                MessageBox.Show(string.Format("Selecione o caminho do dropbox primeiro!"));
             }
         }
 
@@ -168,38 +159,28 @@ namespace CalculaImposto
             try
             {
                 string[] arquivos = Directory.GetFiles(pastaSaida, "*.xml");
-                TNfeProc nfe;
                 NotasFiscais novaNota;
                 Imposto imposto;
-                GerenciadorNfe gerenciadorNfe;
                 List<NotasFiscais> notaList = new List<NotasFiscais>();
                 List<Imposto> impostoList = new List<Imposto>();
                 int quantidadeProdutosNotaF;
-                string arquivo;
-
+              
                 foreach (var file in arquivos)
                 {
-                    nfe = new TNfeProc();
 
-                    gerenciadorNfe = new GerenciadorNfe();
-
-                    nfe = gerenciadorNfe.LerNFE(file);
-
-                    novaNota = NovoObjeto(nfe);
+                    novaNota = NovoObjeto(DesserializarNota(file));
 
                     notaList.Add(novaNota);
 
                     int pos = 0;
 
-                    arquivo = Path.GetFullPath(file);
+                    quantidadeProdutosNotaF = ContaItensNotaFiscal(file);
 
-                    quantidadeProdutosNotaF = ContaItensNotaFiscal(arquivo);
-
-                    buscaAliquotaOrigem = RetornaAliquotaOrigemICMS(arquivo, pos);
+                    buscaAliquotaOrigem = RetornaAliquotaOrigemICMS(file, pos);
 
                     for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
                     {
-                        imposto = ImpostoNotaFiscal(pos, nfe);
+                        imposto = ImpostoNotaFiscal(pos, DesserializarNota(file));
                         impostoList.Add(imposto);
                         pos++;
                     }
@@ -226,34 +207,19 @@ namespace CalculaImposto
             try
             {
                 string arquivo = Path.GetFullPath(caminho);
-                TNfeProc nfe;
                 NotasFiscais novaNota;
                 Imposto imposto;
-               // string pIPI;
-                int quantidadeProdutosNotaF = ContaItensNotaFiscal(caminho);
+                int quantidadeProdutosNotaF = ContaItensNotaFiscal(arquivo);
                 int pos = 0;
                 List<Imposto> impostoList = new List<Imposto>();
-                GerenciadorNfe gerenciadorNfe;
+               
+                novaNota = NovoObjeto(DesserializarNota(arquivo));
 
-                nfe = new TNfeProc();
-
-                gerenciadorNfe = new GerenciadorNfe();
-
-                nfe = gerenciadorNfe.LerNFE(arquivo);
-
-                notaFiscalDesserializada = nfe;
-
-                novaNota = NovoObjeto(nfe);
-
-                buscaAliquotaOrigem = RetornaAliquotaOrigemICMS(caminho, pos);
-
-                pIPI = RetornaIPI(caminho, pos);
-
-                valorProdutoUnitario = RetornaValorProdutoUnitario(caminho, pos);
+                buscaAliquotaOrigem = RetornaAliquotaOrigemICMS(arquivo, pos);
 
                 for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
                 {
-                    imposto = ImpostoNotaFiscal(pos, nfe);
+                    imposto = ImpostoNotaFiscal(pos, DesserializarNota(arquivo));
                     impostoList.Add(imposto);
                     pos++;
                 }
@@ -270,6 +236,25 @@ namespace CalculaImposto
             catch (Exception ex)
             {
                 MessageBox.Show(String.Format("Não foi possível processar o arquivo. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public TNfeProc DesserializarNota(string arquivo)
+        {
+            try
+            {
+                TNfeProc nfe = new TNfeProc();
+
+                GerenciadorNfe gerenciadorNfe = new GerenciadorNfe();
+
+                nfe = gerenciadorNfe.LerNFE(arquivo);
+
+                return nfe;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Não foi possível desserializar nota. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
             }
         }
 
@@ -308,13 +293,13 @@ namespace CalculaImposto
             }
         }
 
-        private void ApagarArquivo(string path) //coloquei esse parâmetro path
+        private void ApagarArquivo(string path) 
         {
             try
             {
                 //   string[] arquivos = Directory.GetFiles(path, "*.xml");
 
-                string[] arquivos = Directory.GetFiles(path); //não sei se apaga os arquivos dentro da pasta, se eles não forem xml
+                string[] arquivos = Directory.GetFiles(path); 
                 foreach (var file in arquivos)
                 {
                     File.Delete(file);
@@ -404,13 +389,23 @@ namespace CalculaImposto
 
                 foreach (XmlNode node in elemList)
                 {
-                    XmlNodeList ali = doc.GetElementsByTagName("orig");
+                    XmlNodeList ali = doc.GetElementsByTagName("pICMS");
                     recuperaItem = ali.Item(pos);
                 }
-                string format = recuperaItem.OuterXml;
-                format = format.Replace("<orig xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
-                format = format.Replace("</orig>", "");
-                return format;
+                if (recuperaItem == null)
+                {
+                    //se o produto não tiver o pICMS
+                    return null;
+                }
+                else
+                {
+                    string format = recuperaItem.OuterXml;
+                    format = format.Replace("<pICMS xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
+                    format = format.Replace("</pICMS>", "");
+                    format = format.TrimEnd('0', ' ');
+                    format = format.Replace(".", " ");
+                    return format;
+                }
             }
             catch (Exception ex)
             {
@@ -422,15 +417,14 @@ namespace CalculaImposto
         {
             try
             {
-                string[] arquivos = Directory.GetFiles(value, "ResumoNotasFiscais.txt", SearchOption.AllDirectories);
                 string arquivo = " ";
-                string caminho = " ";
-                for (int i = arquivos.Length - 1; i >= 0; --i)
+                var fileList = new DirectoryInfo(value).GetFiles("ResumoNotasFiscais*", SearchOption.AllDirectories);
+                foreach (FileInfo file in fileList)
                 {
-                    arquivo = arquivos[i];
+                  //  MessageBox.Show(file.FullName);
+                    arquivo = file.FullName;
                 }
-                caminho = Path.GetFullPath(arquivo);
-                return caminho;
+                return arquivo;
 
             }
             catch (Exception ex)
@@ -447,28 +441,71 @@ namespace CalculaImposto
                 string dataAtualizacao = " ";
                 string[] colunas;
                 Boolean proximalinha = true;
-                using (StreamReader leitor = File.OpenText(nomeArquivo))
+                string trim;
+                string[] teste = File.ReadAllLines(nomeArquivo);
+                foreach (var linha in teste)
                 {
-                    string[] linhas = leitor.ReadToEnd().Split('\n');
-                    foreach (var linha in linhas)
+                   // MessageBox.Show(linha);
+                    //var format= linha.TrimEnd(',', ' ');
+                    if (linha.Contains(ncm))
                     {
-                        if (linha.StartsWith(ncm) && linha.Contains(aliO) && linha.Contains(aliD))
+                        trim = linha.TrimEnd(',', ' ');
+                        colunas = trim.Split(',');
+                        for (int i = 0; i < colunas.Length; i++)
                         {
-                            colunas = linha.Split(',');
-                            for (int i = 0; i <= colunas.Length; i++)
-                            {
-                                dataAtualizacao = colunas[3].Replace(',', ' ');
-                                valorMVA = colunas[4].Replace(',', ' ');
-                                proximalinha = false;
-                            }
+                            //MessageBox.Show(colunas[i]);
+                            // if (linha.Contains(aliO) == true) 
+                            // {
+                            dataAtualizacao = colunas[3].Replace(',', ' ');
+                            //MessageBox.Show(dataAtualizacao);
+                            valorMVA = colunas[4].Replace(',', ' ');
+                            proximalinha = false;
+                            //  } 
+                            break;
                         }
                     }
+                }
+               /*         using (StreamReader leitor = File.OpenText(nomeArquivo))
+                {
+                    string[] linhas = leitor.ReadLine().Split('\n');
+                    foreach (var linha in linhas)
+                    {
+                        MessageBox.Show(linha);
+                        //var format= linha.TrimEnd(',', ' ');
+                        if (linha.Contains(ncm)==true)
+                        {
+                            // && linha.Contains(aliO) && linha.Contains(aliD) 
+                            // MessageBox.Show(linha.StartsWith(ncm).ToString);
+                            trim = linha.TrimEnd(',',' ');
+                            colunas = trim.Split(',');
+                           
+                            for (int i = 0; i < colunas.Length; i++)
+                            {
+                                MessageBox.Show(colunas[i]);
+                                // if (linha.Contains(aliO) == true) 
+                                // {
+                                dataAtualizacao = colunas[3].Replace(',', ' ');
+                                    //MessageBox.Show(dataAtualizacao);
+                                    valorMVA = colunas[4].Replace(',', ' ');
+                                    proximalinha = false;
+                              //  } 
+                                break; 
+                            }
+                           // break;
+                        }
+                        else
+                        {
+                            MessageBox.Show("não encontrou");
+                        }
+                        break;
+                    }*/
+                 //   MessageBox.Show(dataAtualizacao);
                     if (proximalinha == true)
                     {
                         dataAtualizacao = null;
                         valorMVA = null;
-                    }
-                }
+                    }    
+                //}
                 return new Tuple<string, string>(dataAtualizacao, valorMVA);
             }
             catch (Exception ex)
@@ -495,27 +532,37 @@ namespace CalculaImposto
                 imposto.NCM = nfeProc.NFe.infNFe.det[pos].prod.NCM;
                 imposto.Produto = nfeProc.NFe.infNFe.det[pos].prod.xProd; //peguei o nome
                 imposto.TipoReceita = nfeProc.NFe.infNFe.ide.natOp; //natureza operação?
+                //string truncaAliO = buscaAliquotaOrigem.TrimEnd('0',' ');
                 imposto.AliquotaOrigem = Convert.ToDecimal(buscaAliquotaOrigem);
                 // aliD = "18" -> valor atual da alíquota de destino de sergipe;
-                imposto.AliquotaDestino = Convert.ToDecimal(string.Format("{0:p}", aliD));
+                imposto.AliquotaDestino = Convert.ToDecimal(aliD);
 
                 if (recuperaArquivo != null)
                 {
+                    
                     var tupla = LerArquivoTxt(recuperaArquivo, imposto.NCM, buscaAliquotaOrigem, aliD);
                     string mva = tupla.Item2;
+                  //  MessageBox.Show(mva);
                     //se o campo da datagriv mva for alterado, altera a dataAtualizacao, caso não, não faz nada! 
-                    if (mva == null)
-                    {
-                        imposto.MVA = MVA;
-                        imposto.DataAtualizacaoMVA = dataAtualMVAFormatada;
-                    }
-                    else
+                    /*   if (mva == null) //olhar essa lógica
+                       {
+                           imposto.MVA = MVA;
+                           imposto.DataAtualizacaoMVA = dataAtualMVAFormatada;
+                       }
+                       else
+                       {
+                           imposto.DataAtualizacaoMVA = tupla.Item1;
+                           imposto.MVA = Convert.ToDecimal(tupla.Item2);
+                         }
+                   }*/
+                    if (mva != null) //olhar essa lógica
                     {
                         imposto.DataAtualizacaoMVA = tupla.Item1;
                         imposto.MVA = Convert.ToDecimal(tupla.Item2);
                     }
+                   
                 }
-
+                
                 return imposto;
             }
             catch (Exception ex)
@@ -540,6 +587,7 @@ namespace CalculaImposto
                     nomeArquivo = "null";
                 MessageBox.Show(string.Format("Você não pode combinar '{0}' e '{1}' porque: {2}{3}", value, nomeArquivo, Environment.NewLine, ex.Message));
             }
+            //verificar se o NCM, MVA, aliO e aliD já está salvo no arquivo, caso sim, pergunta se quer sobrescrever?
             StreamWriter file = new StreamWriter(caminhoCompleto);
             try
             {
@@ -564,64 +612,7 @@ namespace CalculaImposto
                 file.Close();
             }
         }
-        /*
-            /// <summary>
-            /// Não deletei esse método porque pretendo utilizá-lo para concluir a terceira tarefa, que será necessário exportar para um xls mesmo
-            /// </summary>
-            /// <param name="sender"></param>
-            /// <param name="e"></param>
-            private void exportarXLS()
-            {
-                //cria pasta na aplicacao para salvar localmente o arquivo excel
-                pastaExportarGrid = "ResumoNotasFiscais";
-                CriarDirectorio(pastaExportarGrid);
-
-                // Aplicação Excel
-                Excel.Application App; 
-                Excel.Workbook WorkBook; 
-                Excel.Worksheet WorkSheet; 
-                object misValor = System.Reflection.Missing.Value;
-
-                App = new Excel.Application();
-                WorkBook = App.Workbooks.Add(misValor);
-                WorkSheet = (Excel.Worksheet)WorkBook.Worksheets.get_Item(1);
-                int i = 0;
-                int j = 0;
-
-                // Passa as celulas do DataGridView para a Pasta do Excel
-                for (i = 0; i <= dataGridView3.RowCount - 1; i++)
-                {
-                    for (j = 0; j <= dataGridView3.ColumnCount - 1; j++)
-                    {
-                        DataGridViewCell cell = dataGridView2[j, i];
-                        WorkSheet.Cells[i + 1, j + 1] = cell.Value;
-                    }
-                }
-
-                //Gera um nome para novo arquivo
-                Random numAleatorio = new Random(); 
-                int valorInteiro = numAleatorio.Next();
-                DateTime dataHoje = DateTime.Today;
-                string data = dataHoje.ToString("D");
-                string nomeArquivo = "Extrato-" + data+ " "+valorInteiro+ ".xls";
-
-                //Pega caminho do arquivo criado, dentro da nova pasta criada na aplicação 
-                string CaminhoRaiz = System.Environment.CurrentDirectory; //Pasta debug
-                string[] pasta = { CaminhoRaiz, pastaExportarGrid, nomeArquivo};
-                string caminhoCompleto = Path.Combine(pasta); 
-
-                //salva localmente
-                WorkBook.SaveAs(caminhoCompleto, Excel.XlFileFormat.xlWorkbookNormal, misValor, misValor, misValor, misValor,
-
-                Excel.XlSaveAsAccessMode.xlExclusive, misValor, misValor, misValor, misValor, misValor);
-                WorkBook.Close(true, misValor, misValor);
-                App.Quit(); 
-
-                //Salva no dropbox
-                Dropbox(nomeArquivo, caminhoCompleto);
-
-            }
-       */
+        
         /// <summary>
         /// Pega a célula de aliquota de destino, editada na grid pelo contador e atualizar seu valor. 
         /// Pergunta se deseja atualizar toda a coluna de alíquota Destino para esse valor.
@@ -639,6 +630,7 @@ object sender, DataGridViewCellEventArgs e)
                 if (e.ColumnIndex.Equals(5)) //se o dado alterado for na coluna 5, ao seja, aliquota destino, segue esse comportamento:
                 {
                     aliD = valorAlteradoGrid;
+                    
                     //pergunto se deseja atualizar todos os campos de alíquota Destino com esse valor, caso sim:
                     DialogResult dialogResult = MessageBox.Show("Deseja atualizar todos os campos de alíquota destino para esse valor?", "Atenção", MessageBoxButtons.YesNo);
                     if (dialogResult == DialogResult.Yes)
@@ -648,16 +640,23 @@ object sender, DataGridViewCellEventArgs e)
 
                         // Faz toda coluna not sortable.
                         for (int i = 0; i < dataGridView2.Columns.Count; i++)
+                        {
                             dataGridView2.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+                        }
 
                         // Seta o modo selection para Column.
                         dataGridView2.SelectionMode = DataGridViewSelectionMode.FullColumnSelect;
 
                         // Eu seleciono a coluna AliquotaDestino  
                         if (dataGridView2.Columns.Count > 0)  // Checa se eu tenho pelo menos uma coluna.
+                        {
                             dataGridView2.Columns[5].Selected = true;
+                        }          
                         for (int i = 0; i < dataGridView2.RowCount; i++) //Crio um for do tamanho da quantidade de linhas existente
-                            dataGridView2.Rows[i].Cells[5].Value = aliD; //agora basta inserir o valor da alíquota de destino em todas as células dessa coluna
+                        {
+                            dataGridView2.Rows[i].Cells[5].Value = Convert.ToDecimal(aliD); //agora basta inserir o valor da alíquota de destino em todas as células dessa coluna
+                        }    
+                          
                     }
                     else if (dialogResult == DialogResult.No)
                     {
@@ -670,7 +669,7 @@ object sender, DataGridViewCellEventArgs e)
                     if (valor != MVA)
                     {
                         //produtos com mesmo ncm E ORIGEM, seta de uma vez o MESMO MVA
-                        MVA = Convert.ToDecimal(valorAlteradoGrid);
+                        MVA = valor;
                         //pega a data do sistema no momento em que o MVA foi alterado
                         dataAtualizacaoMVA = DateTime.Today;
                         dataAtualMVAFormatada = dataAtualizacaoMVA.ToString("dd/MM/yyyy"); //não está inserindo a data s2
@@ -684,8 +683,9 @@ object sender, DataGridViewCellEventArgs e)
 
                             // Faz toda coluna not sortable.
                             for (int i = 0; i < dataGridView2.Columns.Count; i++)
+                            {
                                 dataGridView2.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
-
+                            }
                             // Seta o modo selection para Column.
                             dataGridView2.SelectionMode = DataGridViewSelectionMode.FullColumnSelect;
 
@@ -702,10 +702,11 @@ object sender, DataGridViewCellEventArgs e)
                                 int linha = e.RowIndex;  //PEGAR O INDEX DA LINHA ALTERADA 
                                 string ncm = dataGridView2.Rows[linha].Cells[1].Value.ToString();//PEGAR O ncm DA LINHA ALTERADA 
                                 string origem = dataGridView2.Rows[linha].Cells[4].Value.ToString();//PEGAR a aliquota de origem DA LINHA ALTERADA 
-
+                                string destino = dataGridView2.Rows[linha].Cells[5].Value.ToString();
                                 string ncmResto = dataGridView2.Rows[i].Cells[1].Value.ToString(); //PEGAR O ncm do resto  
                                 string origemResto = dataGridView2.Rows[i].Cells[4].Value.ToString();//PEGAR a aliquota do resto 
-                                if (ncmResto.Equals(ncm) && (origemResto.Equals(origem)))
+                                string destinoResto = dataGridView2.Rows[i].Cells[5].Value.ToString();
+                                if (ncmResto.Equals(ncm) && (origemResto.Equals(origem)) && (destinoResto.Equals(destino)))
                                 {
                                     dataGridView2.Rows[i].Cells[7].Value = MVA; //agora basta inserir o valor mva em todas as células dessa coluna
                                     dataGridView2.Rows[i].Cells[6].Value = dataAtualMVAFormatada;
@@ -726,7 +727,7 @@ object sender, DataGridViewCellEventArgs e)
         }
         #endregion
 
-        private void button1_Click(object sender, EventArgs e)
+        private void btnConfirmaSaida_Click(object sender, EventArgs e)
         {
             DialogResult escolha = MessageBox.Show("Tem certeza que deseja sair?", "Mensagem do Sistema", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
@@ -767,44 +768,44 @@ object sender, DataGridViewCellEventArgs e)
             string data = dataHoje.ToString("D");
             string nomeArquivo = "Extrato-" + data + " " + valorInteiro + ".xls";
 
-            //Pega caminho do arquivo criado, dentro da nova pasta criada na aplicação 
-            // string CaminhoRaiz = System.Environment.CurrentDirectory; //Pasta debug
             string[] pasta = { value, nomeArquivo };
             string caminhoCompleto = Path.Combine(pasta);
 
-            //salva localmente
+            //salva na pasta virtual escolhida 
             WorkBook.SaveAs(caminhoCompleto, Excel.XlFileFormat.xlWorkbookNormal, misValor, misValor, misValor, misValor,
 
             Excel.XlSaveAsAccessMode.xlExclusive, misValor, misValor, misValor, misValor, misValor);
             WorkBook.Close(true, misValor, misValor);
             App.Quit();
-
-            //Salva no dropbox
-            // Dropbox(nomeArquivo, caminhoCompleto);
         }
-
+        
         private void btnGerarExtrato_Click(object sender, EventArgs e)
         {
-            ExtratoImposto extrato;
-            CalculaIcmsAntecipado icmsAntecipado;
-            int linha = 0;
-            List<ExtratoImposto> extratoList = new List<ExtratoImposto>();
-            for (int i = 0; i <= dataGridView2.Rows.Count - 1; i++) //percorre todas as linhas da segunda grid
-            {
-                //vai chamar esse método para cada linha da datagridview2
-                icmsAntecipado = new CalculaIcmsAntecipado();
-            //    valorProdutoUnitario = RetornaValorProdutoUnitario(caminho, pos); ->>>>>>>>>>>>>>>>>> chamo aqui ou em processar Arquivo
-                var tupla = DadosSegundaGridParaCalculoIcms(linha, notaFiscalDesserializada);
-                string ncm = tupla.Item1; // é necessário mesmo o ncm?
-                string aliO = tupla.Item2;
-                string mva = tupla.Item3;
-                string valorProduto = tupla.Item4; //ver se realmente está pegando o valor do produto
-                //NÃO ESTÁ PASSANDO O CAMINHO DO ARQUIVOOOOOOOOOOOOOOOO
-                decimal precoGoverno = icmsAntecipado.CalculaPrecoGoverno(Convert.ToDecimal(mva), pIPI, i, Convert.ToDecimal(valorProduto));
-                somaValor = somaValor + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(aliO));
-             //   linha++; //retorno do cálculo está negativo 
-                         //formatar células da grid
-                extrato = ExtratoGrid(notaFiscalDesserializada);
+            if (caminho.EndsWith("xml"))
+               //apenas 1 nota fiscal foi aberta, não necessita do foreach para ler cada nota xml desserializada separadamente
+            { 
+                ExtratoImposto extrato;
+                CalculaIcmsAntecipado icmsAntecipado;
+                int linha = 0;
+                TNfeProc nfe;
+                List<ExtratoImposto> extratoList = new List<ExtratoImposto>();
+                decimal soma = 0;
+                int quantidadeProdutosNotaF = ContaItensNotaFiscal(caminho);
+                string ipi;
+                for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
+                    {
+                    icmsAntecipado = new CalculaIcmsAntecipado();
+                    
+                    var tupla = DadosSegundaGridParaCalculoIcms(linha, DesserializarNota(caminho), caminho);
+                    string pIPI = tupla.Item1;
+                    string valorICMSOrigem = tupla.Item2;
+                    string mva = tupla.Item3;
+                    string valorProduto = tupla.Item4; 
+                    precoGoverno = icmsAntecipado.CalculaPrecoGoverno(Convert.ToDecimal(mva), pIPI, Convert.ToDecimal(valorProduto));
+                    soma = soma + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(valorICMSOrigem));
+                    linha++; 
+                }
+                extrato = ExtratoGrid(DesserializarNota(caminho), soma);
                 extratoList.Add(extrato);
 
                 this.extratoImpostoBindingSource.DataSource = extratoList;
@@ -812,32 +813,87 @@ object sender, DataGridViewCellEventArgs e)
                 this.dataGridView3.DataSource =
                     this.extratoImpostoBindingSource.DataSource;
             }
+            else
+            {
+                GerarExtratoNotasFiscais();
+            }   
         }
-        public Tuple<string, string, string, string> DadosSegundaGridParaCalculoIcms(int pos, TNfeProc nfe)
+        public void GerarExtratoNotasFiscais()
         {
             try
             {
-                string ncm = "";
-                string aliO = "";
+                string[] arquivos = Directory.GetFiles(pastaSaida, "*.xml");
+                TNfeProc nfe= new TNfeProc();
+                GerenciadorNfe gerenciadorNfe;
+                ExtratoImposto extrato;
+                CalculaIcmsAntecipado icmsAntecipado;
+                List<ExtratoImposto> extratoList = new List<ExtratoImposto>();
+                decimal soma = 0;
+                int quantidadeProdutosNotaF;
+                string arquivo;
+                
+                foreach (var file in arquivos)
+                {
+                    nfe = new TNfeProc();
+
+                    gerenciadorNfe = new GerenciadorNfe();
+
+                    nfe = gerenciadorNfe.LerNFE(file);
+
+                    int pos = 0;
+
+                    soma = 0; 
+
+                    arquivo = Path.GetFullPath(file);
+
+                    quantidadeProdutosNotaF = ContaItensNotaFiscal(arquivo);
+
+                    buscaAliquotaOrigem = RetornaAliquotaOrigemICMS(arquivo, pos);
+
+                    for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
+                    {
+                        icmsAntecipado = new CalculaIcmsAntecipado();
+                        var tupla = DadosSegundaGridParaCalculoIcms(pos, nfe, arquivo);
+                        string pIPI = tupla.Item1; 
+                        string valorICMSOrigem = tupla.Item2;
+                        string mva = tupla.Item3;
+                        string valorProduto = tupla.Item4; 
+                        precoGoverno = icmsAntecipado.CalculaPrecoGoverno(Convert.ToDecimal(mva), pIPI, Convert.ToDecimal(valorProduto));
+                        soma = soma + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(valorICMSOrigem));
+                        //obs: formatar células da grid
+                        pos++;
+                    }
+                    extrato = ExtratoGrid(nfe, soma);
+                    extratoList.Add(extrato);
+                }
+
+                this.extratoImpostoBindingSource.DataSource = extratoList;
+
+                this.dataGridView3.DataSource =
+                    this.extratoImpostoBindingSource.DataSource;
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Não foi possível recuperar cada nota fiscal para o extrato. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public Tuple<string, string, string, string> DadosSegundaGridParaCalculoIcms(int pos, TNfeProc nfe, string caminho)
+        {
+            try
+            {
                 string mva = "";
-                // TNfeProc nfe = new TNfeProc(); //deu nulo porque eu não passei a nota fiscal, não está lendo nenhuma nota
-             //   string valorProduto = "";
-                string nomeProduto = "";
-                //  for (int i = 0; i <= dataGridView2.RowCount; i++)
-                //  { //Crio um for do tamanho da quantidade de linhas existente
-
-                ncm = dataGridView2.Rows[pos].Cells[1].Value.ToString();//PEGAR O ncm 
-                aliO = dataGridView2.Rows[pos].Cells[4].Value.ToString();//PEGAR a aliquota de origem 
                 mva = dataGridView2.Rows[pos].Cells[7].Value.ToString();//PEGAR o mva     
-                nomeProduto = dataGridView2.Rows[pos].Cells[2].Value.ToString();
-              //  if (nfe.NFe.infNFe.det[pos].prod.xProd.Equals(nomeProduto)) //acho que não está pegando o valor do produto... olhar isso aqui
-              //  {
-
-             //       valorProduto = nfe.NFe.infNFe.det[pos].prod.vProd; //pega ValorProduto
-              //  }
-         //       RetornaValorProdutoUnitario(caminho,pos);
-                //  }
-                return new Tuple<string, string, string, string>(ncm, aliO, mva, valorProdutoUnitario);
+                pIPI = RetornapIPI(caminho, pos);
+                valorProdutoUnitario = RetornaValorProdutoUnitario(caminho, pos).Replace(".", ",");
+                valorICMSOrigem = RetornaValorICMSOrigem(caminho, pos);
+                
+              if (pIPI != null)
+                {
+                    pIPI = pIPI.TrimEnd('0', ' ');
+                }
+                return new Tuple<string, string, string, string>(pIPI, valorICMSOrigem, mva, valorProdutoUnitario);
             }
             catch (Exception ex)
             {
@@ -846,19 +902,30 @@ object sender, DataGridViewCellEventArgs e)
             }
 
         }
-        public ExtratoImposto ExtratoGrid(TNfeProc nfe)
+        public ExtratoImposto ExtratoGrid(TNfeProc nfe, decimal soma)
         {
             try
             {
                 ExtratoImposto extrato = new ExtratoImposto();
                 extrato.NumeroNota = nfe.NFe.infNFe.ide.nNF;
+                MessageBox.Show(extrato.NumeroNota);
                 //    extrato.Diferenca =
                 //    extrato.FormaRecolhimento =
                 //    extrato.ValorAnalisado =
                 //    extrato.ValorRecolher =
-                extrato.ValorTotalNota = Convert.ToDecimal(nfe.NFe.infNFe.cobr.fat.vLiq);
+                //  string valorTotalNota = nfe.NFe.infNFe.pag.detPag.
+                // string valorTotalNota = nfe.NFe.infNFe.cobr.fat.vLiq;
+                string valorTotalNota = nfe.NFe.infNFe.total.ICMSTot.vNF;
+              
+                if (valorTotalNota != null) 
+                {
+                    string formatvalorTotalNota = valorTotalNota.Replace(".", ",");
+                    extrato.ValorTotalNota = Convert.ToDecimal(formatvalorTotalNota);
+                }
+        
+                extrato.ValorICMSCalculado = soma; 
+                MessageBox.Show(extrato.ValorICMSCalculado.ToString());
 
-                extrato.ValorICMSCalculado = somaValor; //só quando somar todos os valores gerados!
                 return extrato;
             }
             catch (Exception ex)
@@ -873,7 +940,7 @@ object sender, DataGridViewCellEventArgs e)
             {
                 XmlDocument doc = new XmlDocument();
                 doc.Load(pasta);
-                XmlNodeList elemList = doc.GetElementsByTagName("Prod");
+                XmlNodeList elemList = doc.GetElementsByTagName("prod");
                 var recuperaItem = elemList.Item(pos);
                 string format = "";
 
@@ -882,18 +949,18 @@ object sender, DataGridViewCellEventArgs e)
                     XmlNodeList ali = doc.GetElementsByTagName("vProd");
                     recuperaItem = ali.Item(pos);
                 }
-                if (recuperaItem == null)
+             /*   if (recuperaItem == null)
                 {
                     //se o produto não tiver o pIPI
                     return null;
                 }
                 else
-                {
+                {*/
                     format = recuperaItem.OuterXml;
                     format = format.Replace("<vProd xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
                     format = format.Replace("</vProd>", "");
                     return format;
-                }
+              //  }
             }
             catch (Exception ex)
             {
@@ -901,37 +968,84 @@ object sender, DataGridViewCellEventArgs e)
                 return null;
             }
         }
-        public string RetornaIPI(string pasta, int pos)
+        public string RetornapIPI(string pasta, int pos)
+        {
+            try
+            { 
+                XmlDocument doc = new XmlDocument();
+                doc.Load(pasta);
+                var recuperaItem="";
+                var format = "";
+               
+                foreach (XmlNode node in doc.GetElementsByTagName("det")[pos])
+                {
+                    XmlNodeList ali = doc.GetElementsByTagName("IPI");
+
+                    if (ali.Count > 0)
+                    {
+                        foreach (XmlNode pipi in ali)
+                        {
+                            if (pipi.Attributes["pIPI"] != null)
+                            {
+                                MessageBox.Show("recupera Item= " + recuperaItem);
+                                recuperaItem = pipi["pIPI"].InnerText;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        recuperaItem = null;
+                        MessageBox.Show("recuperaItem= " + recuperaItem);
+                    }
+                     
+                    }
+                if (recuperaItem != null)
+                {
+                  //  format = recuperaItem.OuterXml;
+                    format = recuperaItem;
+                    format = format.Replace("<pIPI xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
+                    format = format.Replace("</pIPI>", "");
+                    format = format.Replace(".", " ");
+                }
+                return format;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Não foi possível retornar o IPI. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+        public string RetornaValorICMSOrigem(string pasta, int pos)
         {
             try
             {
                 XmlDocument doc = new XmlDocument();
                 doc.Load(pasta);
-                XmlNodeList elemList = doc.GetElementsByTagName("IPI");
+                XmlNodeList elemList = doc.GetElementsByTagName("ICMS");
                 var recuperaItem = elemList.Item(pos);
                 string format = "";
 
                 foreach (XmlNode node in elemList)
                 {
-                    XmlNodeList ali = doc.GetElementsByTagName("pIPI");
+                    XmlNodeList ali = doc.GetElementsByTagName("vICMS");
                     recuperaItem = ali.Item(pos);
                 }
                 if (recuperaItem == null)
                 {
-                    //se o produto não tiver o pIPI
                     return null;
                 }
                 else
                 {
                     format = recuperaItem.OuterXml;
-                    format = format.Replace("<pIPI xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
-                    format = format.Replace("</pIPI>", "");
+                    format = format.Replace("<vICMS xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
+                    format = format.Replace("</vICMS>", "");
+                    format = format.Replace(".", ",");
                     return format;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format("Não foi possível retornar o IPI. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format("Não foi possível obter o valor da aliquota de origem. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
         }

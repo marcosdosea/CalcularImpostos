@@ -43,13 +43,13 @@
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(790, 477);
+            this.pictureBox1.Size = new System.Drawing.Size(900, 600);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(99, 153);
+            this.textBox1.Location = new System.Drawing.Point(115, 226);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(493, 20);
             this.textBox1.TabIndex = 1;
@@ -59,7 +59,7 @@
             // 
             this.button1.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.button1.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.button1.Location = new System.Drawing.Point(615, 151);
+            this.button1.Location = new System.Drawing.Point(654, 226);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 2;
@@ -71,7 +71,7 @@
             // 
             this.btnProximo.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.btnProximo.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnProximo.Location = new System.Drawing.Point(615, 283);
+            this.btnProximo.Location = new System.Drawing.Point(757, 533);
             this.btnProximo.Name = "btnProximo";
             this.btnProximo.Size = new System.Drawing.Size(75, 23);
             this.btnProximo.TabIndex = 3;
@@ -83,7 +83,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(790, 477);
+            this.ClientSize = new System.Drawing.Size(900, 600);
             this.Controls.Add(this.btnProximo);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox1);

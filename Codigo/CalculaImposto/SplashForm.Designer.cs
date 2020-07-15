@@ -43,7 +43,7 @@
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(774, 438);
+            this.pictureBox1.Size = new System.Drawing.Size(900, 600);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.UseWaitCursor = true;
@@ -52,15 +52,15 @@
             // 
             this.panel1.BackColor = System.Drawing.Color.Black;
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 428);
+            this.panel1.Location = new System.Drawing.Point(0, 590);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(774, 10);
+            this.panel1.Size = new System.Drawing.Size(900, 10);
             this.panel1.TabIndex = 1;
             // 
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.Color.White;
-            this.panel2.Location = new System.Drawing.Point(0, 428);
+            this.panel2.Location = new System.Drawing.Point(0, 590);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(70, 10);
             this.panel2.TabIndex = 2;
@@ -75,7 +75,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(774, 438);
+            this.ClientSize = new System.Drawing.Size(900, 600);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.pictureBox1);
