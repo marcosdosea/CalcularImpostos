@@ -780,144 +780,72 @@ object sender, DataGridViewCellEventArgs e)
             WorkBook.Close(true, misValor, misValor);
             App.Quit();
         }
-
+        private List<ExtratoImposto> GerandoExtrato(string file)
+        {
+            ExtratoImposto extrato;
+            CalculaIcmsAntecipado icmsAntecipado;
+            int linha = 0;
+            int pos = 0;
+            string recuperapIPI = null;
+            List<ExtratoImposto> extratoList = new List<ExtratoImposto>();
+            decimal soma = 0;
+            int quantidadeProdutosNotaF = ContaItensNotaFiscal(file);
+            for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
+            {
+                icmsAntecipado = new CalculaIcmsAntecipado();
+                Boolean verificarpIPI = verificapIPI(file, linha);
+                if (verificarpIPI.Equals(true))
+                {
+                    recuperapIPI = RetornapIPI(file, linha, pos);
+                    pos++;
+                }
+                else
+                {
+                    recuperapIPI = null;
+                }
+                var tupla = DadosSegundaGridParaCalculoIcms(linha, file, recuperapIPI);
+                string pIPI = tupla.Item1;
+                string valorICMSOrigem = tupla.Item2;
+                string mva = tupla.Item3;
+                string valorProduto = tupla.Item4;
+                precoGoverno = icmsAntecipado.CalculaPrecoGoverno(Convert.ToDecimal(mva), pIPI, Convert.ToDecimal(valorProduto));
+                soma = soma + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(valorICMSOrigem));
+                linha++;
+            }
+            extrato = ExtratoGrid(DesserializarNota(file), soma);
+            extratoList.Add(extrato);
+            return extratoList;
+        }
         private void btnGerarExtrato_Click(object sender, EventArgs e)
         {
+            List<ExtratoImposto> extratoList = new List<ExtratoImposto>();
             if (caminho.EndsWith("xml"))
             //apenas 1 nota fiscal foi aberta, não necessita do foreach para ler cada nota xml desserializada separadamente
             {
-                ExtratoImposto extrato;
-                CalculaIcmsAntecipado icmsAntecipado;
-                int linha = 0;
-                int pos = 0;
-                string recuperapIPI=null;
-                // TNfeProc nfe;
-                List<ExtratoImposto> extratoList = new List<ExtratoImposto>();
-                decimal soma = 0;
-                int quantidadeProdutosNotaF = ContaItensNotaFiscal(caminho);
-                // string ipi;
-                for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
-                {
-                    icmsAntecipado = new CalculaIcmsAntecipado();
-                    Boolean verificarpIPI = verificapIPI(caminho, linha);//verifica se o produto que esta sendo lido tem pIPI
-                    if (verificarpIPI.Equals(true))
-                    {
-                       //retorna a posicao do produto que tem pIPI
-                        recuperapIPI = RetornapIPI(caminho, linha, pos);
-                        // recuperapIPI = RetornapIPI(caminho, pos);
-                        //  pIPI = RetornapIPI(caminho, pos);
-                        pos++;
-                    }
-                    else
-                    {
-                        recuperapIPI = null;
-                    }
-                    var tupla = DadosSegundaGridParaCalculoIcms(linha, DesserializarNota(caminho), caminho, recuperapIPI);
-                    string pIPI = tupla.Item1;
-                    string valorICMSOrigem = tupla.Item2;
-                    string mva = tupla.Item3;
-                    string valorProduto = tupla.Item4;
-                    precoGoverno = icmsAntecipado.CalculaPrecoGoverno(Convert.ToDecimal(mva), pIPI, Convert.ToDecimal(valorProduto));
-                    soma = soma + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(valorICMSOrigem));
-                    linha++;
-                }
-                extrato = ExtratoGrid(DesserializarNota(caminho), soma);
-                extratoList.Add(extrato);
-
-                this.extratoImpostoBindingSource.DataSource = extratoList;
-
-                this.dataGridView3.DataSource =
-                    this.extratoImpostoBindingSource.DataSource;
+                extratoList = GerandoExtrato(caminho);
             }
             else
             {
-                GerarExtratoNotasFiscais();
-            }
-        }
-        public void GerarExtratoNotasFiscais()
-        {
-            try
-            {
-                string[] arquivos = Directory.GetFiles(pastaSaida, "*.xml");
-                TNfeProc nfe = new TNfeProc();
-                GerenciadorNfe gerenciadorNfe;
-                ExtratoImposto extrato;
-                CalculaIcmsAntecipado icmsAntecipado;
-                List<ExtratoImposto> extratoList = new List<ExtratoImposto>();
-                decimal soma = 0;
-                int quantidadeProdutosNotaF;
-                string arquivo;
-
-                foreach (var file in arquivos)
-                {
-                    nfe = new TNfeProc();
-
-                    gerenciadorNfe = new GerenciadorNfe();
-
-                    nfe = gerenciadorNfe.LerNFE(file);
-
-                    int pos = 0;
-
-                    soma = 0;
-
-                    arquivo = Path.GetFullPath(file);
-
-                    quantidadeProdutosNotaF = ContaItensNotaFiscal(arquivo);
-
-                    buscaAliquotaOrigem = RetornaAliquotaOrigemICMS(arquivo, pos);
-
-                    string pIPI = null;
-
-                    for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
+                    string[] arquivos = Directory.GetFiles(pastaSaida, "*.xml");   
+                    foreach (var file in arquivos)
                     {
-                        icmsAntecipado = new CalculaIcmsAntecipado();
-                        var tupla = DadosSegundaGridParaCalculoIcms(pos, nfe, arquivo,pIPI);
-                       // string pIPI = tupla.Item1;
-                        string valorICMSOrigem = tupla.Item2;
-                        string mva = tupla.Item3;
-                        string valorProduto = tupla.Item4;
-                        precoGoverno = icmsAntecipado.CalculaPrecoGoverno(Convert.ToDecimal(mva), pIPI, Convert.ToDecimal(valorProduto));
-                        soma = soma + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(valorICMSOrigem));
-                        //obs: formatar células da grid
-                        pos++;
+                        extratoList = GerandoExtrato(file);
                     }
-                    extrato = ExtratoGrid(nfe, soma);
-                    extratoList.Add(extrato);
-                }
-
-                this.extratoImpostoBindingSource.DataSource = extratoList;
-
-                this.dataGridView3.DataSource =
-                    this.extratoImpostoBindingSource.DataSource;
-
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(String.Format("Não foi possível recuperar cada nota fiscal para o extrato. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            this.extratoImpostoBindingSource.DataSource = extratoList;
+
+            this.dataGridView3.DataSource =
+                this.extratoImpostoBindingSource.DataSource;
         }
 
-        public Tuple<string, string, string, string> DadosSegundaGridParaCalculoIcms(int pos, TNfeProc nfe, string caminho,string pIPI)
+        public Tuple<string, string, string, string> DadosSegundaGridParaCalculoIcms(int pos, string caminho,string pIPI)
         {
             try
             {
-               // int cont=0;
                 string mva = "";
                 mva = dataGridView2.Rows[pos].Cells[7].Value.ToString();//PEGAR o mva 
-            /*    Boolean verificarpIPI = verificapIPI(caminho, pos);
-                if (verificarpIPI.Equals(true))
-                {
-                    cont++;
-                    pIPI = RetornapIPI(caminho, pos, posicao);
-                }*/
-               // pIPI = RetornapIPI(caminho, pos);
                 valorProdutoUnitario = RetornaValorProdutoUnitario(caminho, pos).Replace(".", ",");
                 valorICMSOrigem = RetornaValorICMSOrigem(caminho, pos);
-
-            /*    if (pIPI != null)
-                {
-                    pIPI = pIPI.TrimEnd('0', ' ');
-                }*/
                 return new Tuple<string, string, string, string>(pIPI, valorICMSOrigem, mva, valorProdutoUnitario);
             }
             catch (Exception ex)
@@ -941,16 +869,13 @@ object sender, DataGridViewCellEventArgs e)
                 //  string valorTotalNota = nfe.NFe.infNFe.pag.detPag.
                 // string valorTotalNota = nfe.NFe.infNFe.cobr.fat.vLiq;
                 string valorTotalNota = nfe.NFe.infNFe.total.ICMSTot.vNF;
-
                 if (valorTotalNota != null)
                 {
                     string formatvalorTotalNota = valorTotalNota.Replace(".", ",");
                     extrato.ValorTotalNota = Convert.ToDecimal(formatvalorTotalNota);
                 }
-
                 extrato.ValorICMSCalculado = soma;
                 MessageBox.Show(extrato.ValorICMSCalculado.ToString());
-
                 return extrato;
             }
             catch (Exception ex)
@@ -968,24 +893,16 @@ object sender, DataGridViewCellEventArgs e)
                 XmlNodeList elemList = doc.GetElementsByTagName("prod");
                 var recuperaItem = elemList.Item(pos);
                 string format = "";
-
                 foreach (XmlNode node in elemList)
                 {
                     XmlNodeList ali = doc.GetElementsByTagName("vProd");
                     recuperaItem = ali.Item(pos);
                 }
-                /*   if (recuperaItem == null)
-                   {
-                       //se o produto não tiver o pIPI
-                       return null;
-                   }
-                   else
-                   {*/
                 format = recuperaItem.OuterXml;
                 format = format.Replace("<vProd xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
                 format = format.Replace("</vProd>", "");
                 return format;
-                //  }
+
             }
             catch (Exception ex)
             {
@@ -999,16 +916,9 @@ object sender, DataGridViewCellEventArgs e)
             xml.Load(pasta);
             XmlNodeList detList = xml.GetElementsByTagName("det");
             XmlNodeList elemList = xml.GetElementsByTagName("imposto");
-            //  XmlNodeList ipi = null;
-            //  var recuperaItem = " ";
-            //  var format = "";
-            //XmlNode nodeDet = detList[pos];
-            //     XmlNode node = elemList[pos];
-            // int cont = 0;
             Boolean busca = false;
             foreach (XmlNode det in detList[pos])
             {
-
                 foreach (XmlNode n in det)
                 {
                     if (n.Name == "IPI")
@@ -1031,9 +941,7 @@ object sender, DataGridViewCellEventArgs e)
                 XmlNodeList ipi = null;
                 var recuperaItem = " ";
                 var format = "";
-                //XmlNode nodeDet = detList[pos];
                 XmlNode node = elemList[pos];
-              //  int cont = 0;
                 foreach (XmlNode det in detList[pos])
                 {
 
@@ -1041,7 +949,6 @@ object sender, DataGridViewCellEventArgs e)
                     {
                         if (n.Name == "IPI")
                         {
-                          //  cont+=1;
                             ipi = xml.GetElementsByTagName("IPI");
                             foreach (XmlNode busca in ipi)
                             {
@@ -1059,6 +966,7 @@ object sender, DataGridViewCellEventArgs e)
                                         //cont ++;
                                         // break;
                                     }
+                                    break;
                                 }
                             }
                         }
@@ -1070,65 +978,6 @@ object sender, DataGridViewCellEventArgs e)
                     format = recuperaItem;
                     format = format.Replace(".", " ");
                     format = format.TrimEnd('0', ' ');    
-                }
-                return format;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(string.Format("Não foi possível retornar o IPI. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-        }
-        public string RetornaIPI(string pasta, int pos)
-        {
-            try
-            {
-                XmlDocument xml = new XmlDocument();
-                xml.Load(pasta);
-                //XmlNodeList detList = xml.GetElementsByTagName("det");
-                XmlNodeList elemList = xml.GetElementsByTagName("imposto");
-                XmlNodeList ipi = null;
-                var recuperaItem = " ";
-                var format = "";
-                //XmlNode nodeDet = detList[pos];
-                XmlNode node = elemList[pos];
-                int cont = 0;
-                foreach (XmlNode n in node)
-                {
-                    if (n.Name == "IPI")
-                    {
-                        cont++;
-                        ipi = xml.GetElementsByTagName("IPI");
-                        foreach (XmlNode busca in ipi)
-                        {
-                            XmlNodeList ipitrib = xml.GetElementsByTagName("IPITrib");
-                            for (int i = 0; i < ipitrib.Count; i++)
-                            {
-                                // MessageBox.Show(i + " -posicao i");
-                                MessageBox.Show(ipitrib[i]["pIPI"].InnerText + " - Lista IPITRIB  " + i.ToString() + " -posicao i");
-                                //  MessageBox.Show(cont.ToString());
-                                if (i == cont) //não funciona porque a posição do produto as vezes é 9, mas o IPITrib é o 0, primeiro
-                                {
-                                    MessageBox.Show(cont + " -posicao cont");
-                                    recuperaItem = ipitrib[i]["pIPI"].InnerText;
-                                    MessageBox.Show("Recupera item: " + recuperaItem.ToString());
-                                    //cont ++;
-                                    // break;
-                                }
-                                // cont += 1;
-                                // break;
-                            }
-
-                        }
-                        //  cont++;
-
-                    }
-                }
-
-                if (recuperaItem != null)
-                {
-                    format = recuperaItem;
-                    format = format.Replace(".", " ");
                 }
                 return format;
             }
