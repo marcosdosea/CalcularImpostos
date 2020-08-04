@@ -5,8 +5,6 @@ using System.IO.Compression;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Windows.Forms;
 using System.Xml;
-using System.Xml.Linq;
-using System.Linq;
 
 namespace CalculaImposto
 {
@@ -843,7 +841,7 @@ object sender, DataGridViewCellEventArgs e)
             try
             {
                 string mva = "";
-                mva = dataGridView2.Rows[pos].Cells[7].Value.ToString();//PEGAR o mva 
+                mva = dataGridView2.Rows[pos].Cells[7].Value.ToString(); 
                 valorProdutoUnitario = RetornaValorProdutoUnitario(caminho, pos).Replace(".", ",");
                 valorICMSOrigem = RetornaValorICMSOrigem(caminho, pos);
                 return new Tuple<string, string, string, string>(pIPI, valorICMSOrigem, mva, valorProdutoUnitario);
@@ -860,8 +858,7 @@ object sender, DataGridViewCellEventArgs e)
             try
             {
                 ExtratoImposto extrato = new ExtratoImposto();
-                extrato.NumeroNota = nfe.NFe.infNFe.ide.nNF;
-                MessageBox.Show(extrato.NumeroNota);
+                extrato.NumeroNota = nfe.NFe.infNFe.ide.nNF; 
                 //    extrato.Diferenca =
                 // extrato.FormaRecolhimento = nfe.NFe.infNFe.det[1].imposto
                 //    extrato.ValorAnalisado =
@@ -875,7 +872,7 @@ object sender, DataGridViewCellEventArgs e)
                     extrato.ValorTotalNota = Convert.ToDecimal(formatvalorTotalNota);
                 }
                 extrato.ValorICMSCalculado = soma;
-                MessageBox.Show(extrato.ValorICMSCalculado.ToString());
+              
                 return extrato;
             }
             catch (Exception ex)
@@ -954,19 +951,12 @@ object sender, DataGridViewCellEventArgs e)
                             {
                                 XmlNodeList ipitrib = xml.GetElementsByTagName("IPITrib");
                                 for (int i = 0; i < ipitrib.Count; i++)
-                                {
-                                    // MessageBox.Show(i + " -posicao i");
-                                    MessageBox.Show(ipitrib[i]["pIPI"].InnerText + " - Lista IPITRIB  " + i.ToString() + " -posicao i");
-                                    //  MessageBox.Show(cont.ToString());
-                                    if (i == posProduto) //não funciona porque a posição do produto as vezes é 9, mas o IPITrib é o 0, primeiro
+                                {  
+                                    if (i == posProduto) 
                                     {
-                                        MessageBox.Show(posProduto + " -posicao produto com ip");
-                                        recuperaItem = ipitrib[i]["pIPI"].InnerText;
-                                        MessageBox.Show("Recupera item: " + recuperaItem.ToString());
-                                        //cont ++;
-                                        // break;
+                                        recuperaItem = ipitrib[i]["pIPI"].InnerText; 
                                     }
-                                    break;
+                                   // break;
                                 }
                             }
                         }
