@@ -445,67 +445,30 @@ namespace CalculaImposto
                 string[] teste = File.ReadAllLines(nomeArquivo);
                 foreach (var linha in teste)
                 {
-                    // MessageBox.Show(linha);
-                    //var format= linha.TrimEnd(',', ' ');
+                    
                     if (linha.Contains(ncm))
                     {
                         trim = linha.TrimEnd(',', ' ');
                         colunas = trim.Split(',');
                         for (int i = 0; i < colunas.Length; i++)
                         {
-                            //MessageBox.Show(colunas[i]);
-                            // if (linha.Contains(aliO) == true) 
-                            // {
+                            
                             dataAtualizacao = colunas[3].Replace(',', ' ');
-                            //MessageBox.Show(dataAtualizacao);
+                           
                             valorMVA = colunas[4].Replace(',', ' ');
                             proximalinha = false;
-                            //  } 
+                           
                             break;
                         }
                     }
                 }
-                /*         using (StreamReader leitor = File.OpenText(nomeArquivo))
-                 {
-                     string[] linhas = leitor.ReadLine().Split('\n');
-                     foreach (var linha in linhas)
-                     {
-                         MessageBox.Show(linha);
-                         //var format= linha.TrimEnd(',', ' ');
-                         if (linha.Contains(ncm)==true)
-                         {
-                             // && linha.Contains(aliO) && linha.Contains(aliD) 
-                             // MessageBox.Show(linha.StartsWith(ncm).ToString);
-                             trim = linha.TrimEnd(',',' ');
-                             colunas = trim.Split(',');
-
-                             for (int i = 0; i < colunas.Length; i++)
-                             {
-                                 MessageBox.Show(colunas[i]);
-                                 // if (linha.Contains(aliO) == true) 
-                                 // {
-                                 dataAtualizacao = colunas[3].Replace(',', ' ');
-                                     //MessageBox.Show(dataAtualizacao);
-                                     valorMVA = colunas[4].Replace(',', ' ');
-                                     proximalinha = false;
-                               //  } 
-                                 break; 
-                             }
-                            // break;
-                         }
-                         else
-                         {
-                             MessageBox.Show("não encontrou");
-                         }
-                         break;
-                     }*/
-                //   MessageBox.Show(dataAtualizacao);
+                
                 if (proximalinha == true)
                 {
                     dataAtualizacao = null;
                     valorMVA = null;
                 }
-                //}
+               
                 return new Tuple<string, string>(dataAtualizacao, valorMVA);
             }
             catch (Exception ex)
@@ -531,8 +494,7 @@ namespace CalculaImposto
                 imposto.Numero = nfeProc.NFe.infNFe.ide.nNF;
                 imposto.NCM = nfeProc.NFe.infNFe.det[pos].prod.NCM;
                 imposto.Produto = nfeProc.NFe.infNFe.det[pos].prod.xProd; //peguei o nome
-                imposto.TipoReceita = nfeProc.NFe.infNFe.ide.natOp; //natureza operação?
-                //string truncaAliO = buscaAliquotaOrigem.TrimEnd('0',' ');
+                imposto.TipoReceita = nfeProc.NFe.infNFe.ide.natOp; //natureza operação? 
                 imposto.AliquotaOrigem = Convert.ToDecimal(buscaAliquotaOrigem);
                 // aliD = "18" -> valor atual da alíquota de destino de sergipe;
                 imposto.AliquotaDestino = Convert.ToDecimal(aliD);
@@ -542,20 +504,8 @@ namespace CalculaImposto
 
                     var tupla = LerArquivoTxt(recuperaArquivo, imposto.NCM, buscaAliquotaOrigem, aliD);
                     string mva = tupla.Item2;
-                    //  MessageBox.Show(mva);
-                    //se o campo da datagriv mva for alterado, altera a dataAtualizacao, caso não, não faz nada! 
-                    /*   if (mva == null) //olhar essa lógica
-                       {
-                           imposto.MVA = MVA;
-                           imposto.DataAtualizacaoMVA = dataAtualMVAFormatada;
-                       }
-                       else
-                       {
-                           imposto.DataAtualizacaoMVA = tupla.Item1;
-                           imposto.MVA = Convert.ToDecimal(tupla.Item2);
-                         }
-                   }*/
-                    if (mva != null) //olhar essa lógica
+                    
+                    if (mva != null) 
                     {
                         imposto.DataAtualizacaoMVA = tupla.Item1;
                         imposto.MVA = Convert.ToDecimal(tupla.Item2);
@@ -587,18 +537,18 @@ namespace CalculaImposto
                     nomeArquivo = "null";
                 MessageBox.Show(string.Format("Você não pode combinar '{0}' e '{1}' porque: {2}{3}", value, nomeArquivo, Environment.NewLine, ex.Message));
             }
-            //verificar se o NCM, MVA, aliO e aliD já está salvo no arquivo, caso sim, pergunta se quer sobrescrever?
+           
             StreamWriter file = new StreamWriter(caminhoCompleto);
             try
             {
                 string sLine = "";
                 for (int i = 0; i <= dataGridView2.RowCount - 1; i++)
                 { //Crio um for do tamanho da quantidade de linhas existente
-                    sLine = sLine + dataGridView2.Rows[i].Cells[1].Value + ","  //PEGAR O ncm      
-                    + dataGridView2.Rows[i].Cells[4].Value + ","//PEGAR a aliquota de origem 
-                    + dataGridView2.Rows[i].Cells[5].Value + "," //PEGAR a aliquota de destino  
-                    + dataGridView2.Rows[i].Cells[6].Value + ","//PEGAR a data de atualizacao  
-                    + dataGridView2.Rows[i].Cells[7].Value;//PEGAR o mva
+                    sLine = sLine + dataGridView2.Rows[i].Cells[1].Value + ","  //ncm      
+                    + dataGridView2.Rows[i].Cells[4].Value + ","//aliquota de origem 
+                    + dataGridView2.Rows[i].Cells[5].Value + "," //aliquota de destino  
+                    + dataGridView2.Rows[i].Cells[6].Value + ","//data de atualizacao  
+                    + dataGridView2.Rows[i].Cells[7].Value;//mva
                     sLine = sLine + ",";
                     file.WriteLine(sLine);
                     sLine = "";
@@ -700,15 +650,15 @@ object sender, DataGridViewCellEventArgs e)
                             { //Crio um for do tamanho da quantidade de linhas existente
                                 //CHECAR PRIMEIRO SE O NCM E ORIGEM da linha alterada é igual
                                 int linha = e.RowIndex;  //PEGAR O INDEX DA LINHA ALTERADA 
-                                string ncm = dataGridView2.Rows[linha].Cells[1].Value.ToString();//PEGAR O ncm DA LINHA ALTERADA 
-                                string origem = dataGridView2.Rows[linha].Cells[4].Value.ToString();//PEGAR a aliquota de origem DA LINHA ALTERADA 
+                                string ncm = dataGridView2.Rows[linha].Cells[1].Value.ToString();//ncm DA LINHA ALTERADA 
+                                string origem = dataGridView2.Rows[linha].Cells[4].Value.ToString();//aliquota de origem DA LINHA ALTERADA 
                                 string destino = dataGridView2.Rows[linha].Cells[5].Value.ToString();
-                                string ncmResto = dataGridView2.Rows[i].Cells[1].Value.ToString(); //PEGAR O ncm do resto  
-                                string origemResto = dataGridView2.Rows[i].Cells[4].Value.ToString();//PEGAR a aliquota do resto 
+                                string ncmResto = dataGridView2.Rows[i].Cells[1].Value.ToString(); //ncm do resto  
+                                string origemResto = dataGridView2.Rows[i].Cells[4].Value.ToString();//aliquota do resto 
                                 string destinoResto = dataGridView2.Rows[i].Cells[5].Value.ToString();
                                 if (ncmResto.Equals(ncm) && (origemResto.Equals(origem)) && (destinoResto.Equals(destino)))
                                 {
-                                    dataGridView2.Rows[i].Cells[7].Value = MVA; //agora basta inserir o valor mva em todas as células dessa coluna
+                                    dataGridView2.Rows[i].Cells[7].Value = MVA; //inserir o valor mva em todas as células dessa coluna
                                     dataGridView2.Rows[i].Cells[6].Value = dataAtualMVAFormatada;
                                 }
                             }
