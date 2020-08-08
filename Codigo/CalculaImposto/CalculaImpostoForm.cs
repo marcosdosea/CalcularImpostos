@@ -728,14 +728,13 @@ object sender, DataGridViewCellEventArgs e)
             WorkBook.Close(true, misValor, misValor);
             App.Quit();
         }
-        private List<ExtratoImposto> GerandoExtrato(string file)
+        private ExtratoImposto GerandoExtrato(string file)
         {
             ExtratoImposto extrato;
             CalculaIcmsAntecipado icmsAntecipado;
             int linha = 0;
             int pos = 0;
             string recuperapIPI = null;
-            List<ExtratoImposto> extratoList = new List<ExtratoImposto>();
             decimal soma = 0;
             int quantidadeProdutosNotaF = ContaItensNotaFiscal(file);
             for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
@@ -760,9 +759,10 @@ object sender, DataGridViewCellEventArgs e)
                 soma = soma + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(valorICMSOrigem));
                 linha++;
             }
+            
             extrato = ExtratoGrid(DesserializarNota(file), soma);
-            extratoList.Add(extrato);
-            return extratoList;
+
+            return extrato;
         }
         private void btnGerarExtrato_Click(object sender, EventArgs e)
         {
@@ -770,14 +770,14 @@ object sender, DataGridViewCellEventArgs e)
             if (caminho.EndsWith("xml"))
             //apenas 1 nota fiscal foi aberta, não necessita do foreach para ler cada nota xml desserializada separadamente
             {
-                extratoList = GerandoExtrato(caminho);
+                extratoList.Add(GerandoExtrato(caminho));
             }
             else
             {
                     string[] arquivos = Directory.GetFiles(pastaSaida, "*.xml");   
                     foreach (var file in arquivos)
                     {
-                        extratoList = GerandoExtrato(file);
+                    extratoList.Add(GerandoExtrato(file));
                     }
             }
             this.extratoImpostoBindingSource.DataSource = extratoList;
@@ -793,7 +793,8 @@ object sender, DataGridViewCellEventArgs e)
                 string mva = "";
                 mva = dataGridView2.Rows[pos].Cells[7].Value.ToString(); 
                 valorProdutoUnitario = RetornaValorProdutoUnitario(caminho, pos).Replace(".", ",");
-                valorICMSOrigem = RetornaValorICMSOrigem(caminho, pos);
+                //valorICMSOrigem = RetornaValorICMSOrigem(caminho, pos);
+                valorICMSOrigem = RetornaAliquotaOrigemICMS(caminho, pos);
                 return new Tuple<string, string, string, string>(pIPI, valorICMSOrigem, mva, valorProdutoUnitario);
             }
             catch (Exception ex)

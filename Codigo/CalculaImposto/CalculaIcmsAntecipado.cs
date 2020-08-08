@@ -38,16 +38,14 @@ namespace CalculaImposto
                     PrecoGoverno = valorCompra + Convert.ToDecimal(pIPI);
                   
                 }
-            }
-            //truncar duas casas decimais após a virgula do preço do governo
+            }     
             return PrecoGoverno;
         }
-        public decimal CalculaICMSAntecipado(decimal precoGoverno, decimal valorICMCompra)
+        public decimal CalculaICMSAntecipado(decimal precoGoverno, decimal ICMCompra)
         {
-            //truncar duas casas decimais após a vírgula do ICMSAntecipado
-            ICMSAntecipado = ((precoGoverno * (17 / 100)) - valorICMCompra);
+            ICMSAntecipado = precoGoverno * ((ICMCompra/100)-(17 / 100));
             
-            return ICMSAntecipado;
+            return Math.Round(ICMSAntecipado,2);
         }
     }
 }
