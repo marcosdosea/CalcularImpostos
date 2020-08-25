@@ -23,6 +23,8 @@ namespace CalculaImposto
 
         private string aliD = "18";
 
+        private string recuperaNCM;
+
         private DateTime dataAtualizacaoMVA;
 
         private decimal MVA;
@@ -421,7 +423,7 @@ namespace CalculaImposto
                 var fileList = new DirectoryInfo(value).GetFiles("ResumoNotasFiscais*", SearchOption.AllDirectories);
                 foreach (FileInfo file in fileList)
                 {
-                    //  MessageBox.Show(file.FullName);
+
                     arquivo = file.FullName;
                 }
                 return arquivo;
@@ -433,43 +435,46 @@ namespace CalculaImposto
                 return null;
             }
         }
-        public Tuple<string, string> LerArquivoTxt(string nomeArquivo, string ncm, string aliO, string aliD)
+
+        public Tuple<string, string, string, string, string> LerArquivoTxt(string nomeArquivo, string ncm, string aliO, string aliD)
         {
             try
             {
                 string valorMVA = " ";
                 string dataAtualizacao = " ";
+                string aliquotaOrigem = " ";
+                string aliquotaDestino = " ";
                 string[] colunas;
                 Boolean proximalinha = true;
                 string trim;
                 string[] teste = File.ReadAllLines(nomeArquivo);
-                foreach (var linha in teste)
+                string ncmArquivo = null;
+                for (int j = 0; j < teste.Length; j++)
                 {
-                    
-                    if (linha.Contains(ncm))
+                    if (teste[j].Contains(ncm))
                     {
-                        trim = linha.TrimEnd(',', ' ');
+                        trim = teste[j].TrimEnd(',', ' ');
                         colunas = trim.Split(',');
                         for (int i = 0; i < colunas.Length; i++)
                         {
-                            
+                            ncmArquivo = colunas[0].Replace(',', ' ');
+                            aliquotaOrigem = colunas[1].Replace(',', ' ');
+                            aliquotaDestino = colunas[2].Replace(',', ' ');
                             dataAtualizacao = colunas[3].Replace(',', ' ');
-                           
                             valorMVA = colunas[4].Replace(',', ' ');
                             proximalinha = false;
-                           
                             break;
                         }
                     }
                 }
-                
+
                 if (proximalinha == true)
                 {
                     dataAtualizacao = null;
                     valorMVA = null;
                 }
-               
-                return new Tuple<string, string>(dataAtualizacao, valorMVA);
+
+                return new Tuple<string, string, string, string, string>(dataAtualizacao, valorMVA, aliquotaOrigem, aliquotaDestino, ncmArquivo);
             }
             catch (Exception ex)
             {
@@ -477,6 +482,7 @@ namespace CalculaImposto
                 return null;
             }
         }
+
         /// <summary>
         /// Cria um novo objeto do tipo Imposto. Cada nota Fiscal possui um ou vários produtos. Cada produto possui imposto. 
         /// </summary>
@@ -501,18 +507,15 @@ namespace CalculaImposto
 
                 if (recuperaArquivo != null)
                 {
-
                     var tupla = LerArquivoTxt(recuperaArquivo, imposto.NCM, buscaAliquotaOrigem, aliD);
                     string mva = tupla.Item2;
-                    
-                    if (mva != null) 
+
+                    if (mva != null)
                     {
                         imposto.DataAtualizacaoMVA = tupla.Item1;
                         imposto.MVA = Convert.ToDecimal(tupla.Item2);
                     }
-
                 }
-
                 return imposto;
             }
             catch (Exception ex)
@@ -521,13 +524,53 @@ namespace CalculaImposto
                 return null;
             }
         }
-        private void BtnSalvar_Click(object sender, EventArgs e)
+
+        public void AtualizaArquivoTXT(string pasta)
+        {
+            for (int i = 0; i <= dataGridView2.RowCount - 1; i++)
+            {
+                string ncm = dataGridView2.Rows[i].Cells[1].Value.ToString();
+                string aliO = dataGridView2.Rows[i].Cells[4].Value.ToString();
+                string aliD = dataGridView2.Rows[i].Cells[5].Value.ToString();
+                string mva = dataGridView2.Rows[i].Cells[7].Value.ToString();
+                string dataAtualizacao = dataGridView2.Rows[i].Cells[6].Value.ToString();
+                var tupla = LerArquivoTxt(pasta, ncm, aliO, aliD);
+                string ncmArquivo = tupla.Item5;
+                string dataAtualizacaoArquivo = tupla.Item1;
+                string mvaArquivoTxt = tupla.Item2;
+                string aliqOrigem = tupla.Item3;
+                string aliqDestino = tupla.Item4;
+
+                string novaLinha = "";
+
+                if (ncm != ncmArquivo) //se o ncm ainda não tiver gravado no txt
+                {
+                    if (mvaArquivoTxt != mva || aliqOrigem != aliO || aliqDestino != aliD || dataAtualizacaoArquivo != dataAtualizacao)
+                    {
+                        //insere parte alterada na grid, abaixo dos dados que já tem salvo no txt
+                        StreamWriter s = File.AppendText(pasta);
+
+                        novaLinha = novaLinha + ncm + ","
+                    + aliO + ","
+                    + aliD + ","
+                    + dataAtualizacao + ","
+                    + mva;
+                        novaLinha = novaLinha + ",";
+                        s.WriteLine(novaLinha);
+
+                        s.Close();
+                    }
+                }
+            }
+        }
+        private string GerarNomeArquivoTXT()
         {
             string nomeArquivo = "ResumoNotasFiscais.txt";
             string caminhoCompleto = "";
             try
             {
                 caminhoCompleto = Path.Combine(value, nomeArquivo);
+                return caminhoCompleto;
             }
             catch (Exception ex)
             {
@@ -536,30 +579,45 @@ namespace CalculaImposto
                 if (nomeArquivo == null)
                     nomeArquivo = "null";
                 MessageBox.Show(string.Format("Você não pode combinar '{0}' e '{1}' porque: {2}{3}", value, nomeArquivo, Environment.NewLine, ex.Message));
+                return null;
             }
-           
-            StreamWriter file = new StreamWriter(caminhoCompleto);
-            try
+        }
+        private void BtnSalvar_Click(object sender, EventArgs e)
+        {
+
+            string recuperaArquivo = BuscaArquivoTxt();
+            if (recuperaArquivo != null)
             {
-                string sLine = "";
-                for (int i = 0; i <= dataGridView2.RowCount - 1; i++)
-                { //Crio um for do tamanho da quantidade de linhas existente
-                    sLine = sLine + dataGridView2.Rows[i].Cells[1].Value + ","  //ncm      
-                    + dataGridView2.Rows[i].Cells[4].Value + ","//aliquota de origem 
-                    + dataGridView2.Rows[i].Cells[5].Value + "," //aliquota de destino  
-                    + dataGridView2.Rows[i].Cells[6].Value + ","//data de atualizacao  
-                    + dataGridView2.Rows[i].Cells[7].Value;//mva
-                    sLine = sLine + ",";
-                    file.WriteLine(sLine);
-                    sLine = "";
+                AtualizaArquivoTXT(recuperaArquivo);
+            }
+            else
+            {
+                string caminhoCompleto = GerarNomeArquivoTXT();
+                StreamWriter file = new StreamWriter(caminhoCompleto);
+                try
+                {
+
+                    string sLine = "";
+                    for (int i = 0; i <= dataGridView2.RowCount - 1; i++)
+                    { //Crio um for do tamanho da quantidade de linhas existente
+                        sLine = sLine + dataGridView2.Rows[i].Cells[1].Value + ","  //ncm      
+                        + dataGridView2.Rows[i].Cells[4].Value + ","//aliquota de origem 
+                        + dataGridView2.Rows[i].Cells[5].Value + "," //aliquota de destino  
+                        + dataGridView2.Rows[i].Cells[6].Value + ","//data de atualizacao  
+                        + dataGridView2.Rows[i].Cells[7].Value;//mva
+                        sLine = sLine + ",";
+                        file.WriteLine(sLine);
+                        sLine = "";
+                    }
+                    file.Close();
+                    MessageBox.Show("Dados exportados com sucesso.", "Program Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                file.Close();
-                MessageBox.Show("Dados exportados com sucesso.", "Program Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show(err.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                file.Close();
+
+                catch (Exception err)
+                {
+                    MessageBox.Show(err.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    file.Close();
+                }
             }
         }
 
@@ -759,7 +817,7 @@ object sender, DataGridViewCellEventArgs e)
                 soma = soma + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(valorICMSOrigem));
                 linha++;
             }
-            
+
             extrato = ExtratoGrid(DesserializarNota(file), soma);
 
             return extrato;
@@ -774,11 +832,11 @@ object sender, DataGridViewCellEventArgs e)
             }
             else
             {
-                    string[] arquivos = Directory.GetFiles(pastaSaida, "*.xml");   
-                    foreach (var file in arquivos)
-                    {
+                string[] arquivos = Directory.GetFiles(pastaSaida, "*.xml");
+                foreach (var file in arquivos)
+                {
                     extratoList.Add(GerandoExtrato(file));
-                    }
+                }
             }
             this.extratoImpostoBindingSource.DataSource = extratoList;
 
@@ -786,12 +844,12 @@ object sender, DataGridViewCellEventArgs e)
                 this.extratoImpostoBindingSource.DataSource;
         }
 
-        public Tuple<string, string, string, string> DadosSegundaGridParaCalculoIcms(int pos, string caminho,string pIPI)
+        public Tuple<string, string, string, string> DadosSegundaGridParaCalculoIcms(int pos, string caminho, string pIPI)
         {
             try
             {
                 string mva = "";
-                mva = dataGridView2.Rows[pos].Cells[7].Value.ToString(); 
+                mva = dataGridView2.Rows[pos].Cells[7].Value.ToString();
                 valorProdutoUnitario = RetornaValorProdutoUnitario(caminho, pos).Replace(".", ",");
                 //valorICMSOrigem = RetornaValorICMSOrigem(caminho, pos);
                 valorICMSOrigem = RetornaAliquotaOrigemICMS(caminho, pos);
@@ -809,7 +867,7 @@ object sender, DataGridViewCellEventArgs e)
             try
             {
                 ExtratoImposto extrato = new ExtratoImposto();
-                extrato.NumeroNota = nfe.NFe.infNFe.ide.nNF; 
+                extrato.NumeroNota = nfe.NFe.infNFe.ide.nNF;
                 //    extrato.Diferenca =
                 // extrato.FormaRecolhimento = nfe.NFe.infNFe.det[1].imposto
                 //    extrato.ValorAnalisado =
@@ -823,7 +881,7 @@ object sender, DataGridViewCellEventArgs e)
                     extrato.ValorTotalNota = Convert.ToDecimal(formatvalorTotalNota);
                 }
                 extrato.ValorICMSCalculado = soma;
-              
+
                 return extrato;
             }
             catch (Exception ex)
@@ -871,14 +929,14 @@ object sender, DataGridViewCellEventArgs e)
                 {
                     if (n.Name == "IPI")
                     {
-                        busca= true;
+                        busca = true;
                     }
                 }
             }
-                        return busca;
+            return busca;
         }
 
-        public string RetornapIPI(string pasta, int pos,int posProduto)
+        public string RetornapIPI(string pasta, int pos, int posProduto)
         {
             try
             {
@@ -902,12 +960,12 @@ object sender, DataGridViewCellEventArgs e)
                             {
                                 XmlNodeList ipitrib = xml.GetElementsByTagName("IPITrib");
                                 for (int i = 0; i < ipitrib.Count; i++)
-                                {  
-                                    if (i == posProduto) 
+                                {
+                                    if (i == posProduto)
                                     {
-                                        recuperaItem = ipitrib[i]["pIPI"].InnerText; 
+                                        recuperaItem = ipitrib[i]["pIPI"].InnerText;
                                     }
-                                   // break;
+                                    // break;
                                 }
                             }
                         }
@@ -918,47 +976,13 @@ object sender, DataGridViewCellEventArgs e)
                 {
                     format = recuperaItem;
                     format = format.Replace(".", " ");
-                    format = format.TrimEnd('0', ' ');    
+                    format = format.TrimEnd('0', ' ');
                 }
                 return format;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(string.Format("Não foi possível retornar o IPI. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-        }
-        public string RetornaValorICMSOrigem(string pasta, int pos)
-        {
-            try
-            {
-                XmlDocument doc = new XmlDocument();
-                doc.Load(pasta);
-                XmlNodeList elemList = doc.GetElementsByTagName("ICMS");
-                var recuperaItem = elemList.Item(pos);
-                string format = "";
-
-                foreach (XmlNode node in elemList)
-                {
-                    XmlNodeList ali = doc.GetElementsByTagName("vICMS");
-                    recuperaItem = ali.Item(pos);
-                }
-                if (recuperaItem == null)
-                {
-                    return null;
-                }
-                else
-                {
-                    format = recuperaItem.OuterXml;
-                    format = format.Replace("<vICMS xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
-                    format = format.Replace("</vICMS>", "");
-                    format = format.Replace(".", ",");
-                    return format;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(string.Format("Não foi possível obter o valor da aliquota de origem. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
         }
