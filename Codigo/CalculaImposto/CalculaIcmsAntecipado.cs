@@ -11,7 +11,7 @@ namespace CalculaImposto
             decimal PrecoGoverno;
            
             //ver se o NCM possui MVA >0
-            if (mva > 0)
+            if (mva > 0) //adiciona uma linha com os produtos que tem mva
             {
                 //se mva > 0 então ele é substituto
                 if (pIPI.IsNullOrEmpty()) //o produto não tem pIPI
@@ -19,7 +19,7 @@ namespace CalculaImposto
                     PrecoGoverno = valorCompra * (mva / 100);
                     
                 }
-                else
+                else //adiciona uma linha para os produtos que NÃo tem mva
                 {
                     //o produto tem pIPI
                     PrecoGoverno = ((valorCompra + Convert.ToDecimal(pIPI)) * (mva / 100)) + Convert.ToDecimal(pIPI);

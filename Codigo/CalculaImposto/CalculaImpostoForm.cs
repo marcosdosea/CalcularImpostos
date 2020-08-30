@@ -5,6 +5,11 @@ using System.IO.Compression;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Windows.Forms;
 using System.Xml;
+using Microsoft.VisualStudio.Services.Common;
+using System.ComponentModel;
+using System.Windows.Documents;
+using System.Linq;
+using Microsoft.TeamFoundation.Common;
 
 namespace CalculaImposto
 {
@@ -786,14 +791,27 @@ object sender, DataGridViewCellEventArgs e)
             WorkBook.Close(true, misValor, misValor);
             App.Quit();
         }
-        private ExtratoImposto GerandoExtrato(string file)
+        private Boolean verificaMVA(int pos, string file, string pipi)
+        {
+            Boolean resultado = true;
+            var tupla = DadosSegundaGridParaCalculoIcms(pos, file, pipi);
+            string mva = tupla.Item3;
+            if (mva.IsNullOrEmpty() || Convert.ToDecimal(mva) <= 0)
+            {
+                resultado = false;
+            }
+            return resultado;
+        }
+        private Tuple<ExtratoImposto, int> GerandoExtratoSemMVA(string file)
         {
             ExtratoImposto extrato;
             CalculaIcmsAntecipado icmsAntecipado;
+            Boolean temMva = false;
             int linha = 0;
             int pos = 0;
+            int cont = 0;
             string recuperapIPI = null;
-            decimal soma = 0;
+            decimal somaProdutoComMVA = 0;
             int quantidadeProdutosNotaF = ContaItensNotaFiscal(file);
             for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
             {
@@ -808,36 +826,147 @@ object sender, DataGridViewCellEventArgs e)
                 {
                     recuperapIPI = null;
                 }
-                var tupla = DadosSegundaGridParaCalculoIcms(linha, file, recuperapIPI);
-                string pIPI = tupla.Item1;
-                string valorICMSOrigem = tupla.Item2;
-                string mva = tupla.Item3;
-                string valorProduto = tupla.Item4;
-                precoGoverno = icmsAntecipado.CalculaPrecoGoverno(Convert.ToDecimal(mva), pIPI, Convert.ToDecimal(valorProduto));
-                soma = soma + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(valorICMSOrigem));
+                temMva = verificaMVA(linha, file, recuperapIPI);
+                if (temMva.Equals(false))
+                {
+                    var tupla = DadosSegundaGridParaCalculoIcms(linha, file, recuperapIPI);
+                    string pIPI = tupla.Item1;
+                    string valorICMSOrigem = tupla.Item2;
+                    string mva = tupla.Item3;
+                    string valorProduto = tupla.Item4;
+                    precoGoverno = icmsAntecipado.CalculaPrecoGoverno(Convert.ToDecimal(mva), pIPI, Convert.ToDecimal(valorProduto));
+                    somaProdutoComMVA = somaProdutoComMVA + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(valorICMSOrigem));
+                }
+                else
+                {
+                    cont++;
+                }
+
                 linha++;
             }
-
-            extrato = ExtratoGrid(DesserializarNota(file), soma);
-
-            return extrato;
+            if (somaProdutoComMVA != 0)
+            {
+                extrato = ExtratoGrid(DesserializarNota(file), somaProdutoComMVA);
+            }
+            else
+            {
+                extrato = null;
+            }
+            return new Tuple<ExtratoImposto, int>(extrato, cont);
+        }
+        private Tuple<ExtratoImposto, int, Boolean> GerandoExtratoComMVA(string file)
+        {
+            ExtratoImposto extrato;
+            CalculaIcmsAntecipado icmsAntecipado;
+            Boolean temMva = false;
+            int linha = 0;
+            int pos = 0;
+            int cont = 0;
+            string recuperapIPI = null;
+            decimal somaProdutoComMVA = 0;
+            int quantidadeProdutosNotaF = ContaItensNotaFiscal(file);
+            for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
+            {
+                icmsAntecipado = new CalculaIcmsAntecipado();
+                Boolean verificarpIPI = verificapIPI(file, linha);
+                if (verificarpIPI.Equals(true))
+                {
+                    recuperapIPI = RetornapIPI(file, linha, pos);
+                    pos++;
+                }
+                else
+                {
+                    recuperapIPI = null;
+                }
+                temMva = verificaMVA(linha, file, recuperapIPI);
+                if (temMva.Equals(true))
+                {
+                    var tupla = DadosSegundaGridParaCalculoIcms(linha, file, recuperapIPI);
+                    string pIPI = tupla.Item1;
+                    string valorICMSOrigem = tupla.Item2;
+                    string mva = tupla.Item3;
+                    string valorProduto = tupla.Item4;
+                    temMva = true;
+                    precoGoverno = icmsAntecipado.CalculaPrecoGoverno(Convert.ToDecimal(mva), pIPI, Convert.ToDecimal(valorProduto));
+                    somaProdutoComMVA = somaProdutoComMVA + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(valorICMSOrigem));
+                }
+                else
+                {
+                    cont++;
+                }
+                linha++;
+            }
+            if (somaProdutoComMVA != 0)
+            {
+                extrato = ExtratoGrid(DesserializarNota(file), somaProdutoComMVA);
+            }
+            else
+            {
+                extrato = null;
+            }
+            return new Tuple<ExtratoImposto, int, Boolean>(extrato, cont, temMva);
         }
         private void btnGerarExtrato_Click(object sender, EventArgs e)
         {
             List<ExtratoImposto> extratoList = new List<ExtratoImposto>();
+
             if (caminho.EndsWith("xml"))
             //apenas 1 nota fiscal foi aberta, não necessita do foreach para ler cada nota xml desserializada separadamente
             {
-                extratoList.Add(GerandoExtrato(caminho));
+                var tupla = GerandoExtratoComMVA(caminho);
+                ExtratoImposto extrato = tupla.Item1;
+                int cont = tupla.Item2;
+                Boolean temMva = tupla.Item3;
+                if (temMva.Equals(true))
+                {
+                    extratoList.Add(extrato);
+                }
+                if (cont > 0)
+                {
+                    var gerarExtratoSemMva = GerandoExtratoSemMVA(caminho);
+                    ExtratoImposto extratoSemMVA = gerarExtratoSemMva.Item1;
+                    extratoList.Add(extratoSemMVA);
+                    int conta = gerarExtratoSemMva.Item2;
+                    if (conta > 0)
+                    {
+                        tupla = GerandoExtratoComMVA(caminho);
+                        extrato = tupla.Item1;
+                        extratoList.Add(extrato);
+                    }
+                }
             }
             else
             {
                 string[] arquivos = Directory.GetFiles(pastaSaida, "*.xml");
                 foreach (var file in arquivos)
                 {
-                    extratoList.Add(GerandoExtrato(file));
+                    var tupla = GerandoExtratoComMVA(file);
+                    ExtratoImposto extrato = tupla.Item1;
+                    int cont = tupla.Item2;
+                    Boolean temMva = tupla.Item3;
+                    if (temMva.Equals(true))
+                    {
+                        extratoList.Add(extrato);
+                    }
+                    if (cont > 0)
+                    {
+                        var gerarExtratoSemMva = GerandoExtratoSemMVA(file);
+                        ExtratoImposto extratoSemMVA = gerarExtratoSemMva.Item1;
+                        extratoList.Add(extratoSemMVA);
+                        int conta = gerarExtratoSemMva.Item2;
+                        if (temMva.Equals(false))
+                        {
+                            if (conta > 0)
+                            {
+                                tupla = GerandoExtratoComMVA(file);
+                                extrato = tupla.Item1;
+                                extratoList.Add(extrato);
+                            }
+                        }
+                    }
                 }
             }
+
             this.extratoImpostoBindingSource.DataSource = extratoList;
 
             this.dataGridView3.DataSource =
@@ -848,10 +977,8 @@ object sender, DataGridViewCellEventArgs e)
         {
             try
             {
-                string mva = "";
-                mva = dataGridView2.Rows[pos].Cells[7].Value.ToString();
+                string mva = dataGridView2.Rows[pos].Cells[7].Value.ToString();
                 valorProdutoUnitario = RetornaValorProdutoUnitario(caminho, pos).Replace(".", ",");
-                //valorICMSOrigem = RetornaValorICMSOrigem(caminho, pos);
                 valorICMSOrigem = RetornaAliquotaOrigemICMS(caminho, pos);
                 return new Tuple<string, string, string, string>(pIPI, valorICMSOrigem, mva, valorProdutoUnitario);
             }
@@ -868,19 +995,14 @@ object sender, DataGridViewCellEventArgs e)
             {
                 ExtratoImposto extrato = new ExtratoImposto();
                 extrato.NumeroNota = nfe.NFe.infNFe.ide.nNF;
-                //    extrato.Diferenca =
-                // extrato.FormaRecolhimento = nfe.NFe.infNFe.det[1].imposto
-                //    extrato.ValorAnalisado =
-                //    extrato.ValorRecolher =
-                //  string valorTotalNota = nfe.NFe.infNFe.pag.detPag.
-                // string valorTotalNota = nfe.NFe.infNFe.cobr.fat.vLiq;
                 string valorTotalNota = nfe.NFe.infNFe.total.ICMSTot.vNF;
                 if (valorTotalNota != null)
                 {
                     string formatvalorTotalNota = valorTotalNota.Replace(".", ",");
                     extrato.ValorTotalNota = Convert.ToDecimal(formatvalorTotalNota);
                 }
-                extrato.ValorICMSCalculado = soma;
+                extrato.ValorICMSCalculado = Convert.ToDecimal(nfe.NFe.infNFe.total.ICMSTot.vICMS.Replace(".", ","));
+                extrato.ValorAnalisado = soma;
 
                 return extrato;
             }
