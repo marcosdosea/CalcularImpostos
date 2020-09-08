@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Windows.Documents;
 using System.Linq;
 using Microsoft.TeamFoundation.Common;
+using System.Globalization;
 
 namespace CalculaImposto
 {
@@ -431,6 +432,10 @@ namespace CalculaImposto
 
                     arquivo = file.FullName;
                 }
+                if (arquivo == " ")
+                {
+                    arquivo = null;
+                }
                 return arquivo;
 
             }
@@ -441,7 +446,7 @@ namespace CalculaImposto
             }
         }
 
-        public Tuple<string, string, string, string, string> LerArquivoTxt(string nomeArquivo, string ncm, string aliO, string aliD)
+        public Tuple<string, string, string, string, string,int> LerArquivoTxt(string nomeArquivo, string ncm, string aliO, string aliD)
         {
             try
             {
@@ -454,10 +459,12 @@ namespace CalculaImposto
                 string trim;
                 string[] teste = File.ReadAllLines(nomeArquivo);
                 string ncmArquivo = null;
+                int linha = 0;
                 for (int j = 0; j < teste.Length; j++)
                 {
                     if (teste[j].Contains(ncm))
                     {
+                        linha = j;
                         trim = teste[j].TrimEnd(',', ' ');
                         colunas = trim.Split(',');
                         for (int i = 0; i < colunas.Length; i++)
@@ -475,11 +482,11 @@ namespace CalculaImposto
 
                 if (proximalinha == true)
                 {
-                    dataAtualizacao = null;
-                    valorMVA = null;
+                    dataAtualizacao = "";
+                    valorMVA = "";
                 }
 
-                return new Tuple<string, string, string, string, string>(dataAtualizacao, valorMVA, aliquotaOrigem, aliquotaDestino, ncmArquivo);
+                return new Tuple<string, string, string, string, string,int>(dataAtualizacao, valorMVA, aliquotaOrigem, aliquotaDestino, ncmArquivo,linha);
             }
             catch (Exception ex)
             {
@@ -500,7 +507,7 @@ namespace CalculaImposto
             {
                 // checar se já existe um arquivo resumo nota fiscal salvo no dropbox local 
                 string recuperaArquivo = BuscaArquivoTxt();
-
+               
                 Imposto imposto = new Imposto();
                 imposto.Numero = nfeProc.NFe.infNFe.ide.nNF;
                 imposto.NCM = nfeProc.NFe.infNFe.det[pos].prod.NCM;
@@ -509,13 +516,12 @@ namespace CalculaImposto
                 imposto.AliquotaOrigem = Convert.ToDecimal(buscaAliquotaOrigem);
                 // aliD = "18" -> valor atual da alíquota de destino de sergipe;
                 imposto.AliquotaDestino = Convert.ToDecimal(aliD);
-
-                if (recuperaArquivo != null)
+                
+                if (recuperaArquivo!=" " && recuperaArquivo!=null)
                 {
                     var tupla = LerArquivoTxt(recuperaArquivo, imposto.NCM, buscaAliquotaOrigem, aliD);
                     string mva = tupla.Item2;
-
-                    if (mva != null)
+                    if (String.IsNullOrEmpty(mva).Equals(false))
                     {
                         imposto.DataAtualizacaoMVA = tupla.Item1;
                         imposto.MVA = Convert.ToDecimal(tupla.Item2);
@@ -545,16 +551,12 @@ namespace CalculaImposto
                 string mvaArquivoTxt = tupla.Item2;
                 string aliqOrigem = tupla.Item3;
                 string aliqDestino = tupla.Item4;
-
+                int linha = tupla.Item6;
                 string novaLinha = "";
 
                 if (ncm != ncmArquivo) //se o ncm ainda não tiver gravado no txt
-                {
-                    if (mvaArquivoTxt != mva || aliqOrigem != aliO || aliqDestino != aliD || dataAtualizacaoArquivo != dataAtualizacao)
-                    {
-                        //insere parte alterada na grid, abaixo dos dados que já tem salvo no txt
+                { 
                         StreamWriter s = File.AppendText(pasta);
-
                         novaLinha = novaLinha + ncm + ","
                     + aliO + ","
                     + aliD + ","
@@ -562,11 +564,43 @@ namespace CalculaImposto
                     + mva;
                         novaLinha = novaLinha + ",";
                         s.WriteLine(novaLinha);
-
                         s.Close();
+                } 
+                if (ncm.Equals(ncmArquivo) && dataAtualizacaoArquivo != dataAtualizacao)
+                {
+                    MessageBox.Show(dataAtualizacaoArquivo.ToString());
+                    if (dataAtualizacaoArquivo.IsNullOrEmpty().Equals(false))
+                    {
+                        DateTime dataGrid = DateTime.ParseExact(dataAtualizacao, "dd/MM/yyyy", null); 
+                        DateTime dataArq = DateTime.ParseExact(dataAtualizacaoArquivo, "dd/MM/yyyy", null);
+                        int result = DateTime.Compare(dataArq, dataGrid);
+
+                        if (result < 0)
+                        {
+                            AtualizaLinhaTXT(linha, pasta, ncm, aliO, aliD, dataAtualizacao, mva);
+                        }
                     }
-                }
+                    else
+                    {
+                        AtualizaLinhaTXT(linha,pasta,ncm,aliO,aliD,dataAtualizacao,mva);
+                    }
+                }      
             }
+        }
+        private void AtualizaLinhaTXT(int linha, string pasta, string ncm,string aliO,string aliD,string dataAtualizacao, string mva)
+        {
+            //atualizar essa linha do arquivo
+            string sLine = "";
+            string[] teste = File.ReadAllLines(pasta);
+            sLine = sLine + ncm + ","+
+                        aliO + ","+
+                        aliD + ","+
+                        dataAtualizacao + ","+
+                        mva;
+            sLine = sLine + ",";
+            teste[linha-1] = sLine;
+           // teste[linha].Replace(teste[linha - 1],sLine);
+            File.WriteAllLines(pasta, teste);
         }
         private string GerarNomeArquivoTXT()
         {
