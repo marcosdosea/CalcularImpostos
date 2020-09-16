@@ -73,6 +73,11 @@
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.btnGerarExtrato = new System.Windows.Forms.Button();
             this.dataGridView3 = new System.Windows.Forms.DataGridView();
+            this.numeroNotaDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.valorTotalNotaDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.valorICMSCalculadoDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.valorAnalisadoDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.formaRecolhimentoDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.extratoImpostoBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.btnExportar = new System.Windows.Forms.Button();
             this.tabPage4 = new System.Windows.Forms.TabPage();
@@ -81,11 +86,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.openFileDialogNfe = new System.Windows.Forms.OpenFileDialog();
             this.button1 = new System.Windows.Forms.Button();
-            this.numeroNotaDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.valorTotalNotaDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.valorICMSCalculadoDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.valorAnalisadoDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.formaRecolhimentoDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -476,6 +476,36 @@
             this.dataGridView3.Size = new System.Drawing.Size(892, 536);
             this.dataGridView3.TabIndex = 0;
             // 
+            // numeroNotaDataGridViewTextBoxColumn
+            // 
+            this.numeroNotaDataGridViewTextBoxColumn.DataPropertyName = "NumeroNota";
+            this.numeroNotaDataGridViewTextBoxColumn.HeaderText = "NumeroNota";
+            this.numeroNotaDataGridViewTextBoxColumn.Name = "numeroNotaDataGridViewTextBoxColumn";
+            // 
+            // valorTotalNotaDataGridViewTextBoxColumn
+            // 
+            this.valorTotalNotaDataGridViewTextBoxColumn.DataPropertyName = "ValorTotalNota";
+            this.valorTotalNotaDataGridViewTextBoxColumn.HeaderText = "ValorTotalNota";
+            this.valorTotalNotaDataGridViewTextBoxColumn.Name = "valorTotalNotaDataGridViewTextBoxColumn";
+            // 
+            // valorICMSCalculadoDataGridViewTextBoxColumn
+            // 
+            this.valorICMSCalculadoDataGridViewTextBoxColumn.DataPropertyName = "ValorICMSCalculado";
+            this.valorICMSCalculadoDataGridViewTextBoxColumn.HeaderText = "ValorICMSCalculado";
+            this.valorICMSCalculadoDataGridViewTextBoxColumn.Name = "valorICMSCalculadoDataGridViewTextBoxColumn";
+            // 
+            // valorAnalisadoDataGridViewTextBoxColumn
+            // 
+            this.valorAnalisadoDataGridViewTextBoxColumn.DataPropertyName = "ValorAnalisado";
+            this.valorAnalisadoDataGridViewTextBoxColumn.HeaderText = "ValorAnalisado";
+            this.valorAnalisadoDataGridViewTextBoxColumn.Name = "valorAnalisadoDataGridViewTextBoxColumn";
+            // 
+            // formaRecolhimentoDataGridViewTextBoxColumn
+            // 
+            this.formaRecolhimentoDataGridViewTextBoxColumn.DataPropertyName = "FormaRecolhimento";
+            this.formaRecolhimentoDataGridViewTextBoxColumn.HeaderText = "FormaRecolhimento";
+            this.formaRecolhimentoDataGridViewTextBoxColumn.Name = "formaRecolhimentoDataGridViewTextBoxColumn";
+            // 
             // extratoImpostoBindingSource
             // 
             this.extratoImpostoBindingSource.DataSource = typeof(CalculaImposto.ExtratoImposto);
@@ -555,36 +585,6 @@
             this.button1.Text = "Sair";
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.btnConfirmaSaida_Click);
-            // 
-            // numeroNotaDataGridViewTextBoxColumn
-            // 
-            this.numeroNotaDataGridViewTextBoxColumn.DataPropertyName = "NumeroNota";
-            this.numeroNotaDataGridViewTextBoxColumn.HeaderText = "NumeroNota";
-            this.numeroNotaDataGridViewTextBoxColumn.Name = "numeroNotaDataGridViewTextBoxColumn";
-            // 
-            // valorTotalNotaDataGridViewTextBoxColumn
-            // 
-            this.valorTotalNotaDataGridViewTextBoxColumn.DataPropertyName = "ValorTotalNota";
-            this.valorTotalNotaDataGridViewTextBoxColumn.HeaderText = "ValorTotalNota";
-            this.valorTotalNotaDataGridViewTextBoxColumn.Name = "valorTotalNotaDataGridViewTextBoxColumn";
-            // 
-            // valorICMSCalculadoDataGridViewTextBoxColumn
-            // 
-            this.valorICMSCalculadoDataGridViewTextBoxColumn.DataPropertyName = "ValorICMSCalculado";
-            this.valorICMSCalculadoDataGridViewTextBoxColumn.HeaderText = "ValorICMSCalculado";
-            this.valorICMSCalculadoDataGridViewTextBoxColumn.Name = "valorICMSCalculadoDataGridViewTextBoxColumn";
-            // 
-            // valorAnalisadoDataGridViewTextBoxColumn
-            // 
-            this.valorAnalisadoDataGridViewTextBoxColumn.DataPropertyName = "ValorAnalisado";
-            this.valorAnalisadoDataGridViewTextBoxColumn.HeaderText = "ValorAnalisado";
-            this.valorAnalisadoDataGridViewTextBoxColumn.Name = "valorAnalisadoDataGridViewTextBoxColumn";
-            // 
-            // formaRecolhimentoDataGridViewTextBoxColumn
-            // 
-            this.formaRecolhimentoDataGridViewTextBoxColumn.DataPropertyName = "FormaRecolhimento";
-            this.formaRecolhimentoDataGridViewTextBoxColumn.HeaderText = "FormaRecolhimento";
-            this.formaRecolhimentoDataGridViewTextBoxColumn.Name = "formaRecolhimentoDataGridViewTextBoxColumn";
             // 
             // FrmCalculaImposto
             // 

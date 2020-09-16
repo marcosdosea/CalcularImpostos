@@ -1,5 +1,6 @@
 ﻿using Microsoft.TeamFoundation.Common;
 using System;
+using System.Windows;
 
 namespace CalculaImposto
 {
@@ -10,41 +11,39 @@ namespace CalculaImposto
         {
             decimal PrecoGoverno;
            
-            //ver se o NCM possui MVA >0
             if (mva > 0) //adiciona uma linha com os produtos que tem mva
             {
                 //se mva > 0 então ele é substituto
                 if (pIPI.IsNullOrEmpty()) //o produto não tem pIPI
                 {
+                   
                     PrecoGoverno = valorCompra * (mva / 100);
                     
                 }
                 else //adiciona uma linha para os produtos que NÃo tem mva
                 {
-                    //o produto tem pIPI
+                    
                     PrecoGoverno = ((valorCompra + Convert.ToDecimal(pIPI)) * (mva / 100)) + Convert.ToDecimal(pIPI);
                   
                 }
             }
-            else //if (mva == 0)//se o mva for igual a zero é porque o produto é normal
+            else //se o mva for igual a zero é porque o produto é normal
             {
                 if (pIPI.IsNullOrEmpty()) //o produto não tem pIPI
                 {
                     PrecoGoverno = valorCompra;
-                   
                 }
                 else //o produto tem pIPI
                 {
                     PrecoGoverno = valorCompra + Convert.ToDecimal(pIPI);
-                  
                 }
             }     
             return PrecoGoverno;
         }
-        public decimal CalculaICMSAntecipado(decimal precoGoverno, decimal ICMCompra)
+        public decimal CalculaICMSAntecipado(decimal precoGoverno, decimal valorICMCompra)
         {
-            ICMSAntecipado = precoGoverno * ((ICMCompra/100)-(17 / 100));
-            
+            decimal multiplica = precoGoverno * 18/100;
+            ICMSAntecipado = multiplica - valorICMCompra;
             return Math.Round(ICMSAntecipado,2);
         }
     }

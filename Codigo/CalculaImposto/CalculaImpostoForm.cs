@@ -29,15 +29,11 @@ namespace CalculaImposto
 
         private string aliD = "18";
 
-        private string recuperaNCM;
-
         private DateTime dataAtualizacaoMVA;
 
         private decimal MVA;
 
         private string value = ConfiguracaoDropbox.GetValue("pastaDropbox");
-
-        private string pIPI;
 
         private string valorProdutoUnitario;
 
@@ -421,6 +417,42 @@ namespace CalculaImposto
                 return null;
             }
         }
+        public string RetornavalorICMS(string pasta, int pos)
+        {
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.Load(pasta);
+                XmlNodeList elemList = doc.GetElementsByTagName("ICMS");
+                var recuperaItem = elemList.Item(pos);
+
+                foreach (XmlNode node in elemList)
+                {
+                    XmlNodeList ali = doc.GetElementsByTagName("vICMS");
+                    recuperaItem = ali.Item(pos);
+
+                }
+                if (recuperaItem == null)
+                {
+                    //se o produto não tiver o vICMS
+                    return null;
+                }
+                else
+                {
+                    string format = recuperaItem.OuterXml;
+                    format = format.Replace("<vICMS xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
+                    format = format.Replace("</vICMS>", "");
+                    format = format.Replace(".", ",");
+
+                    return format;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Não foi possível obter valor ICMS. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
         public string BuscaArquivoTxt()
         {
             try
@@ -446,7 +478,7 @@ namespace CalculaImposto
             }
         }
 
-        public Tuple<string, string, string, string, string,int> LerArquivoTxt(string nomeArquivo, string ncm, string aliO, string aliD)
+        public Tuple<string, string, string, string, string, int> LerArquivoTxt(string nomeArquivo, string ncm, string aliO, string aliD)
         {
             try
             {
@@ -473,7 +505,16 @@ namespace CalculaImposto
                             aliquotaOrigem = colunas[1].Replace(',', ' ');
                             aliquotaDestino = colunas[2].Replace(',', ' ');
                             dataAtualizacao = colunas[3].Replace(',', ' ');
-                            valorMVA = colunas[4].Replace(',', ' ');
+                            valorMVA = colunas[4];
+                            if (colunas.Length == 6)
+                            {
+                                valorMVA = valorMVA + "," + colunas[5].Replace(',', ' ');
+                            }
+                            else
+                            {
+                                valorMVA = valorMVA.Replace(',', ' ');
+                            }
+
                             proximalinha = false;
                             break;
                         }
@@ -486,7 +527,7 @@ namespace CalculaImposto
                     valorMVA = "";
                 }
 
-                return new Tuple<string, string, string, string, string,int>(dataAtualizacao, valorMVA, aliquotaOrigem, aliquotaDestino, ncmArquivo,linha);
+                return new Tuple<string, string, string, string, string, int>(dataAtualizacao, valorMVA, aliquotaOrigem, aliquotaDestino, ncmArquivo, linha);
             }
             catch (Exception ex)
             {
@@ -507,7 +548,7 @@ namespace CalculaImposto
             {
                 // checar se já existe um arquivo resumo nota fiscal salvo no dropbox local 
                 string recuperaArquivo = BuscaArquivoTxt();
-               
+
                 Imposto imposto = new Imposto();
                 imposto.Numero = nfeProc.NFe.infNFe.ide.nNF;
                 imposto.NCM = nfeProc.NFe.infNFe.det[pos].prod.NCM;
@@ -516,8 +557,8 @@ namespace CalculaImposto
                 imposto.AliquotaOrigem = Convert.ToDecimal(buscaAliquotaOrigem);
                 // aliD = "18" -> valor atual da alíquota de destino de sergipe;
                 imposto.AliquotaDestino = Convert.ToDecimal(aliD);
-                
-                if (recuperaArquivo!=" " && recuperaArquivo!=null)
+
+                if (recuperaArquivo != " " && recuperaArquivo != null)
                 {
                     var tupla = LerArquivoTxt(recuperaArquivo, imposto.NCM, buscaAliquotaOrigem, aliD);
                     string mva = tupla.Item2;
@@ -538,70 +579,116 @@ namespace CalculaImposto
 
         public void AtualizaArquivoTXT(string pasta)
         {
+            string dataAtualizacao = null;
             for (int i = 0; i <= dataGridView2.RowCount - 1; i++)
             {
                 string ncm = dataGridView2.Rows[i].Cells[1].Value.ToString();
                 string aliO = dataGridView2.Rows[i].Cells[4].Value.ToString();
                 string aliD = dataGridView2.Rows[i].Cells[5].Value.ToString();
                 string mva = dataGridView2.Rows[i].Cells[7].Value.ToString();
-                string dataAtualizacao = dataGridView2.Rows[i].Cells[6].Value.ToString();
+                //    string dataAtualizacao = dataGridView2.Rows[i].Cells[6].Value;
                 var tupla = LerArquivoTxt(pasta, ncm, aliO, aliD);
                 string ncmArquivo = tupla.Item5;
                 string dataAtualizacaoArquivo = tupla.Item1;
-                string mvaArquivoTxt = tupla.Item2;
-                string aliqOrigem = tupla.Item3;
-                string aliqDestino = tupla.Item4;
+                string mvaArquivo = tupla.Item2;
+                string aliOrigemArquivo = tupla.Item3;
+                string aliDestinoArquivo = tupla.Item4;
                 int linha = tupla.Item6;
                 string novaLinha = "";
 
                 if (ncm != ncmArquivo) //se o ncm ainda não tiver gravado no txt
-                { 
-                        StreamWriter s = File.AppendText(pasta);
-                        novaLinha = novaLinha + ncm + ","
-                    + aliO + ","
-                    + aliD + ","
-                    + dataAtualizacao + ","
-                    + mva;
-                        novaLinha = novaLinha + ",";
-                        s.WriteLine(novaLinha);
-                        s.Close();
-                } 
+                {
+                    StreamWriter s = File.AppendText(pasta);
+                    novaLinha = novaLinha + ncm + ","
+                + aliO + ","
+                + aliD + ","
+                + dataGridView2.Rows[i].Cells[6].Value + ","
+                + mva;
+                    novaLinha = novaLinha + ",";
+                    s.WriteLine(novaLinha);
+                    s.Close();
+                }
+                if (dataGridView2.Rows[i].Cells[6].Value != null)
+                {
+                    dataAtualizacao = dataGridView2.Rows[i].Cells[6].Value.ToString();
+                }
                 if (ncm.Equals(ncmArquivo) && dataAtualizacaoArquivo != dataAtualizacao)
                 {
-                    MessageBox.Show(dataAtualizacaoArquivo.ToString());
                     if (dataAtualizacaoArquivo.IsNullOrEmpty().Equals(false))
                     {
-                        DateTime dataGrid = DateTime.ParseExact(dataAtualizacao, "dd/MM/yyyy", null); 
+                        DateTime dataGrid = DateTime.ParseExact(dataAtualizacao, "dd/MM/yyyy", null);
                         DateTime dataArq = DateTime.ParseExact(dataAtualizacaoArquivo, "dd/MM/yyyy", null);
                         int result = DateTime.Compare(dataArq, dataGrid);
 
                         if (result < 0)
                         {
-                            AtualizaLinhaTXT(linha, pasta, ncm, aliO, aliD, dataAtualizacao, mva);
+                            string sLine = "";
+                            sLine = sLine + ncm + "," +
+                           aliO + "," +
+                           aliD + "," +
+                           dataAtualizacao + "," +
+                           mva;
+                            sLine = sLine + ",";
+                            AlteraLinha(pasta, ncm, sLine, linha);
                         }
                     }
                     else
                     {
-                        AtualizaLinhaTXT(linha,pasta,ncm,aliO,aliD,dataAtualizacao,mva);
+                        string sLine = "";
+                        sLine = sLine + ncm + "," +
+                       aliO + "," +
+                       aliD + "," +
+                       dataAtualizacao + "," +
+                       mva;
+                        sLine = sLine + ",";
+                        AlteraLinha(pasta, ncm, sLine, linha);
                     }
-                }      
+                }
+                if (ncm.Equals(ncmArquivo) && dataAtualizacaoArquivo == dataAtualizacao)
+                {
+                    if (mva != mvaArquivo || aliO != aliOrigemArquivo || aliD != aliDestinoArquivo)
+                    {
+                        string sLine = "";
+                        sLine = sLine + ncm + "," +
+                       aliO + "," +
+                       aliD + "," +
+                       dataAtualizacao + "," +
+                       mva;
+                        sLine = sLine + ",";
+                        AlteraLinha(pasta, ncm, sLine, linha);
+                    }
+                }
             }
         }
-        private void AtualizaLinhaTXT(int linha, string pasta, string ncm,string aliO,string aliD,string dataAtualizacao, string mva)
+
+        private void AlteraLinha(string pasta, string ncm, string linhaAtualizada, int posicaolinha)
         {
-            //atualizar essa linha do arquivo
-            string sLine = "";
-            string[] teste = File.ReadAllLines(pasta);
-            sLine = sLine + ncm + ","+
-                        aliO + ","+
-                        aliD + ","+
-                        dataAtualizacao + ","+
-                        mva;
-            sLine = sLine + ",";
-            teste[linha-1] = sLine;
-           // teste[linha].Replace(teste[linha - 1],sLine);
-            File.WriteAllLines(pasta, teste);
+
+            string[] lines = File.ReadAllLines(pasta);
+
+            if (lines.Length == 0)
+            {
+                MessageBox.Show("Seu arquivo está vazio!");
+                return;
+            }
+
+            using (StreamWriter writer = new StreamWriter(pasta))
+            {
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    // Verifica se é a segunda linha e se o conteúdo da mesma é igual ao usuário atual
+                    if (i == posicaolinha && lines[i].Contains(ncm))
+                    {
+                        writer.WriteLine(linhaAtualizada);
+                    }
+                    else
+                    {
+                        writer.WriteLine(lines[i]);
+                    }
+                }
+            }
         }
+
         private string GerarNomeArquivoTXT()
         {
             string nomeArquivo = "ResumoNotasFiscais.txt";
@@ -713,13 +800,13 @@ object sender, DataGridViewCellEventArgs e)
                 else if (e.ColumnIndex.Equals(7)) //se o dado alterado for na coluna 7, MVA
                 {
                     decimal valor = Convert.ToDecimal(valorAlteradoGrid);
-                    if (valor != MVA)
+                    if (valor != MVA || valor.Equals(0))
                     {
                         //produtos com mesmo ncm E ORIGEM, seta de uma vez o MESMO MVA
                         MVA = valor;
                         //pega a data do sistema no momento em que o MVA foi alterado
                         dataAtualizacaoMVA = DateTime.Today;
-                        dataAtualMVAFormatada = dataAtualizacaoMVA.ToString("dd/MM/yyyy"); //não está inserindo a data s2
+                        dataAtualMVAFormatada = dataAtualizacaoMVA.ToString("dd/MM/yyyy");
                         dataGridView2.Rows[e.RowIndex].Cells[6].Value = dataAtualMVAFormatada;
 
                         DialogResult dialogResult = MessageBox.Show("Deseja atualizar todos os campos de MVA, com mesmo NCM e origem, para esse valor?", "Atenção", MessageBoxButtons.YesNo);
@@ -1013,7 +1100,7 @@ object sender, DataGridViewCellEventArgs e)
             {
                 string mva = dataGridView2.Rows[pos].Cells[7].Value.ToString();
                 valorProdutoUnitario = RetornaValorProdutoUnitario(caminho, pos).Replace(".", ",");
-                valorICMSOrigem = RetornaAliquotaOrigemICMS(caminho, pos);
+                valorICMSOrigem = RetornavalorICMS(caminho, pos);
                 return new Tuple<string, string, string, string>(pIPI, valorICMSOrigem, mva, valorProdutoUnitario);
             }
             catch (Exception ex)
@@ -1077,7 +1164,6 @@ object sender, DataGridViewCellEventArgs e)
             XmlDocument xml = new XmlDocument();
             xml.Load(pasta);
             XmlNodeList detList = xml.GetElementsByTagName("det");
-            XmlNodeList elemList = xml.GetElementsByTagName("imposto");
             Boolean busca = false;
             foreach (XmlNode det in detList[pos])
             {
@@ -1142,6 +1228,7 @@ object sender, DataGridViewCellEventArgs e)
                 return null;
             }
         }
+
         #endregion
     }
 }
