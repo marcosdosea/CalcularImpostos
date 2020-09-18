@@ -106,15 +106,43 @@ namespace CalculaImposto
                 }
             }
         }
-        public NotasFiscais NovoObjeto(TNfeProc nfeProc)
+        public string RetornaCnpjFornecedor(string pasta, int pos)
         {
             try
             {
+                XmlDocument doc = new XmlDocument();
+                doc.Load(pasta);
+                XmlNodeList elemList = doc.GetElementsByTagName("emit");
+                var recuperaItem = elemList.Item(pos);
+
+                foreach (XmlNode node in elemList)
+                {
+                    XmlNodeList ali = doc.GetElementsByTagName("CNPJ");
+                    recuperaItem = ali.Item(pos);
+                }
+                
+                    string format = recuperaItem.OuterXml;
+                    format = format.Replace("<CNPJ xmlns=\"http://www.portalfiscal.inf.br/nfe\">", "");
+                    format = format.Replace("</CNPJ>", "");
+                   
+                    return format;
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Não foi possível obter o CNPJ do fornecedor. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+        public NotasFiscais NovoObjeto(TNfeProc nfeProc,string arquivo,int posicao)
+        {
+            try
+            {         
                 NotasFiscais notasFiscais = new NotasFiscais();
                 notasFiscais.Numero = nfeProc.NFe.infNFe.ide.nNF;
                 // notasFiscais.Numero = nfeProc.NFe.infNFe.ide.nNF;
-                notasFiscais.Fornecedor = nfeProc.NFe.infNFe.emit.IE;
-
+                notasFiscais.NomeFornecedor = nfeProc.NFe.infNFe.emit.xNome;
+                notasFiscais.CnpjFornecedor = RetornaCnpjFornecedor(arquivo, posicao);
                 notasFiscais.DataEmissao = nfeProc.NFe.infNFe.ide.dhEmi;
                 DateTime converterData = Convert.ToDateTime(notasFiscais.DataEmissao);
                 string strDate = converterData.ToString("dd/MM/yyyy");
@@ -172,11 +200,10 @@ namespace CalculaImposto
                 foreach (var file in arquivos)
                 {
 
-                    novaNota = NovoObjeto(DesserializarNota(file));
+                    int pos = 0;
+                    novaNota = NovoObjeto(DesserializarNota(file),file,pos);
 
                     notaList.Add(novaNota);
-
-                    int pos = 0;
 
                     quantidadeProdutosNotaF = ContaItensNotaFiscal(file);
 
@@ -185,7 +212,11 @@ namespace CalculaImposto
                     for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
                     {
                         imposto = ImpostoNotaFiscal(pos, DesserializarNota(file));
-                        impostoList.Add(imposto);
+                        Boolean verifica = PesquisaImpostoList(impostoList, imposto.NCM, imposto.AliquotaOrigem);
+                        if (verifica.Equals(false))
+                        {
+                            impostoList.Add(imposto);
+                        }
                         pos++;
                     }
                 }
@@ -205,6 +236,19 @@ namespace CalculaImposto
                 MessageBox.Show(String.Format("Não foi possível processar os arquivos do diretorio. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        private Boolean PesquisaImpostoList(List<Imposto> imposto, string ncm, decimal aliOrigem)
+        {
+            Boolean resultado = false;
+            for (int i = 0; i < imposto.Count; i++)
+            {
+                if (ncm.Equals(imposto[i].NCM) && aliOrigem.Equals(imposto[i].AliquotaOrigem))
+                {
+                    resultado = true;
+                    break;
+                }  
+            }
+            return resultado;
+        }
 
         public void ProcessarArquivo()
         {
@@ -217,15 +261,19 @@ namespace CalculaImposto
                 int pos = 0;
                 List<Imposto> impostoList = new List<Imposto>();
 
-                novaNota = NovoObjeto(DesserializarNota(arquivo));
+                novaNota = NovoObjeto(DesserializarNota(arquivo),arquivo,pos);
 
                 buscaAliquotaOrigem = RetornaAliquotaOrigemICMS(arquivo, pos);
 
                 for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
                 {
                     imposto = ImpostoNotaFiscal(pos, DesserializarNota(arquivo));
-                    impostoList.Add(imposto);
-                    pos++;
+                    Boolean verifica = PesquisaImpostoList(impostoList, imposto.NCM, imposto.AliquotaOrigem);
+                    if (verifica.Equals(false))
+                    {
+                        impostoList.Add(imposto);
+                    }
+                        pos++;    
                 }
 
                 this.notasFiscaisBindingSource.DataSource = novaNota;
@@ -550,9 +598,7 @@ namespace CalculaImposto
                 string recuperaArquivo = BuscaArquivoTxt();
 
                 Imposto imposto = new Imposto();
-                imposto.Numero = nfeProc.NFe.infNFe.ide.nNF;
                 imposto.NCM = nfeProc.NFe.infNFe.det[pos].prod.NCM;
-                imposto.Produto = nfeProc.NFe.infNFe.det[pos].prod.xProd; //peguei o nome
                 imposto.TipoReceita = nfeProc.NFe.infNFe.ide.natOp; //natureza operação? 
                 imposto.AliquotaOrigem = Convert.ToDecimal(buscaAliquotaOrigem);
                 // aliD = "18" -> valor atual da alíquota de destino de sergipe;
@@ -582,10 +628,10 @@ namespace CalculaImposto
             string dataAtualizacao = null;
             for (int i = 0; i <= dataGridView2.RowCount - 1; i++)
             {
-                string ncm = dataGridView2.Rows[i].Cells[1].Value.ToString();
-                string aliO = dataGridView2.Rows[i].Cells[4].Value.ToString();
-                string aliD = dataGridView2.Rows[i].Cells[5].Value.ToString();
-                string mva = dataGridView2.Rows[i].Cells[7].Value.ToString();
+                string ncm = dataGridView2.Rows[i].Cells[0].Value.ToString();
+                string aliO = dataGridView2.Rows[i].Cells[2].Value.ToString();
+                string aliD = dataGridView2.Rows[i].Cells[3].Value.ToString();
+                string mva = dataGridView2.Rows[i].Cells[5].Value.ToString();
                 //    string dataAtualizacao = dataGridView2.Rows[i].Cells[6].Value;
                 var tupla = LerArquivoTxt(pasta, ncm, aliO, aliD);
                 string ncmArquivo = tupla.Item5;
@@ -602,15 +648,15 @@ namespace CalculaImposto
                     novaLinha = novaLinha + ncm + ","
                 + aliO + ","
                 + aliD + ","
-                + dataGridView2.Rows[i].Cells[6].Value + ","
+                + dataGridView2.Rows[i].Cells[4].Value + ","
                 + mva;
                     novaLinha = novaLinha + ",";
                     s.WriteLine(novaLinha);
                     s.Close();
                 }
-                if (dataGridView2.Rows[i].Cells[6].Value != null)
+                if (dataGridView2.Rows[i].Cells[4].Value != null)
                 {
-                    dataAtualizacao = dataGridView2.Rows[i].Cells[6].Value.ToString();
+                    dataAtualizacao = dataGridView2.Rows[i].Cells[4].Value.ToString();
                 }
                 if (ncm.Equals(ncmArquivo) && dataAtualizacaoArquivo != dataAtualizacao)
                 {
@@ -726,11 +772,11 @@ namespace CalculaImposto
                     string sLine = "";
                     for (int i = 0; i <= dataGridView2.RowCount - 1; i++)
                     { //Crio um for do tamanho da quantidade de linhas existente
-                        sLine = sLine + dataGridView2.Rows[i].Cells[1].Value + ","  //ncm      
-                        + dataGridView2.Rows[i].Cells[4].Value + ","//aliquota de origem 
-                        + dataGridView2.Rows[i].Cells[5].Value + "," //aliquota de destino  
-                        + dataGridView2.Rows[i].Cells[6].Value + ","//data de atualizacao  
-                        + dataGridView2.Rows[i].Cells[7].Value;//mva
+                        sLine = sLine + dataGridView2.Rows[i].Cells[0].Value + ","  //ncm      
+                        + dataGridView2.Rows[i].Cells[2].Value + ","//aliquota de origem 
+                        + dataGridView2.Rows[i].Cells[3].Value + "," //aliquota de destino  
+                        + dataGridView2.Rows[i].Cells[4].Value + ","//data de atualizacao  
+                        + dataGridView2.Rows[i].Cells[5].Value;//mva
                         sLine = sLine + ",";
                         file.WriteLine(sLine);
                         sLine = "";
@@ -756,48 +802,15 @@ namespace CalculaImposto
         private void dataGridView2_CellEndEdit(
 object sender, DataGridViewCellEventArgs e)
         {
-            // dataAtualizacaoMVA = DateTime.Today;
             try
             {
                 //obtendo o valor que foi alterado na grid
                 string valorAlteradoGrid = dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
-                if (e.ColumnIndex.Equals(5)) //se o dado alterado for na coluna 5, ao seja, aliquota destino, segue esse comportamento:
+                if (e.ColumnIndex.Equals(3)) //se o dado alterado for na coluna 5, ao seja, aliquota destino, segue esse comportamento:
                 {
                     aliD = valorAlteradoGrid;
-
-                    //pergunto se deseja atualizar todos os campos de alíquota Destino com esse valor, caso sim:
-                    DialogResult dialogResult = MessageBox.Show("Deseja atualizar todos os campos de alíquota destino para esse valor?", "Atenção", MessageBoxButtons.YesNo);
-                    if (dialogResult == DialogResult.Yes)
-                    {
-                        // Limpa as células selecionadas na grid
-                        dataGridView2.ClearSelection();
-
-                        // Faz toda coluna not sortable.
-                        for (int i = 0; i < dataGridView2.Columns.Count; i++)
-                        {
-                            dataGridView2.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
-                        }
-
-                        // Seta o modo selection para Column.
-                        dataGridView2.SelectionMode = DataGridViewSelectionMode.FullColumnSelect;
-
-                        // Eu seleciono a coluna AliquotaDestino  
-                        if (dataGridView2.Columns.Count > 0)  // Checa se eu tenho pelo menos uma coluna.
-                        {
-                            dataGridView2.Columns[5].Selected = true;
-                        }
-                        for (int i = 0; i < dataGridView2.RowCount; i++) //Crio um for do tamanho da quantidade de linhas existente
-                        {
-                            dataGridView2.Rows[i].Cells[5].Value = Convert.ToDecimal(aliD); //agora basta inserir o valor da alíquota de destino em todas as células dessa coluna
-                        }
-
-                    }
-                    else if (dialogResult == DialogResult.No)
-                    {
-                        MessageBox.Show(String.Format("Valor alterado com sucesso! Novo valor de aliquota destino: {0}", aliD));
-                    }
                 }
-                else if (e.ColumnIndex.Equals(7)) //se o dado alterado for na coluna 7, MVA
+                else if (e.ColumnIndex.Equals(5)) //se o dado alterado for na coluna 7, MVA
                 {
                     decimal valor = Convert.ToDecimal(valorAlteradoGrid);
                     if (valor != MVA || valor.Equals(0))
@@ -807,50 +820,7 @@ object sender, DataGridViewCellEventArgs e)
                         //pega a data do sistema no momento em que o MVA foi alterado
                         dataAtualizacaoMVA = DateTime.Today;
                         dataAtualMVAFormatada = dataAtualizacaoMVA.ToString("dd/MM/yyyy");
-                        dataGridView2.Rows[e.RowIndex].Cells[6].Value = dataAtualMVAFormatada;
-
-                        DialogResult dialogResult = MessageBox.Show("Deseja atualizar todos os campos de MVA, com mesmo NCM e origem, para esse valor?", "Atenção", MessageBoxButtons.YesNo);
-                        if (dialogResult == DialogResult.Yes)
-                        {
-                            // Limpa as células selecionadas na grid
-                            dataGridView2.ClearSelection();
-
-                            // Faz toda coluna not sortable.
-                            for (int i = 0; i < dataGridView2.Columns.Count; i++)
-                            {
-                                dataGridView2.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
-                            }
-                            // Seta o modo selection para Column.
-                            dataGridView2.SelectionMode = DataGridViewSelectionMode.FullColumnSelect;
-
-                            // Eu seleciono a coluna mva  
-                            if (dataGridView2.Columns.Count > 0)
-                            { // Checa se eu tenho pelo menos uma coluna.
-                                dataGridView2.Columns[7].Selected = true;
-                                //   dataGridView2.Columns[1].Selected = true; //NCM
-                                //   dataGridView2.Columns[4].Selected = true; //ORIGEM
-                            }
-                            for (int i = 0; i < dataGridView2.RowCount; i++)
-                            { //Crio um for do tamanho da quantidade de linhas existente
-                                //CHECAR PRIMEIRO SE O NCM E ORIGEM da linha alterada é igual
-                                int linha = e.RowIndex;  //PEGAR O INDEX DA LINHA ALTERADA 
-                                string ncm = dataGridView2.Rows[linha].Cells[1].Value.ToString();//ncm DA LINHA ALTERADA 
-                                string origem = dataGridView2.Rows[linha].Cells[4].Value.ToString();//aliquota de origem DA LINHA ALTERADA 
-                                string destino = dataGridView2.Rows[linha].Cells[5].Value.ToString();
-                                string ncmResto = dataGridView2.Rows[i].Cells[1].Value.ToString(); //ncm do resto  
-                                string origemResto = dataGridView2.Rows[i].Cells[4].Value.ToString();//aliquota do resto 
-                                string destinoResto = dataGridView2.Rows[i].Cells[5].Value.ToString();
-                                if (ncmResto.Equals(ncm) && (origemResto.Equals(origem)) && (destinoResto.Equals(destino)))
-                                {
-                                    dataGridView2.Rows[i].Cells[7].Value = MVA; //inserir o valor mva em todas as células dessa coluna
-                                    dataGridView2.Rows[i].Cells[6].Value = dataAtualMVAFormatada;
-                                }
-                            }
-                        }
-                        else if (dialogResult == DialogResult.No)
-                        {
-                            MessageBox.Show(String.Format("Valor alterado com sucesso! Novo valor de MVA: {0}", MVA));
-                        }
+                        dataGridView2.Rows[e.RowIndex].Cells[4].Value = dataAtualMVAFormatada;
                     }
                 }
             }
@@ -1040,18 +1010,21 @@ object sender, DataGridViewCellEventArgs e)
                 Boolean temMva = tupla.Item3;
                 if (temMva.Equals(true))
                 {
+                    extrato.FormaRecolhimento = "Antecipação com encerramento de fase";
                     extratoList.Add(extrato);
                 }
                 if (cont > 0)
                 {
                     var gerarExtratoSemMva = GerandoExtratoSemMVA(caminho);
                     ExtratoImposto extratoSemMVA = gerarExtratoSemMva.Item1;
+                    extratoSemMVA.FormaRecolhimento = "Complementação de alíquota";
                     extratoList.Add(extratoSemMVA);
                     int conta = gerarExtratoSemMva.Item2;
                     if (conta > 0)
                     {
                         tupla = GerandoExtratoComMVA(caminho);
                         extrato = tupla.Item1;
+                        extrato.FormaRecolhimento = "Antecipação com encerramento de fase";
                         extratoList.Add(extrato);
                     }
                 }
@@ -1067,12 +1040,14 @@ object sender, DataGridViewCellEventArgs e)
                     Boolean temMva = tupla.Item3;
                     if (temMva.Equals(true))
                     {
+                        extrato.FormaRecolhimento = "Antecipação com encerramento de fase";
                         extratoList.Add(extrato);
                     }
                     if (cont > 0)
                     {
                         var gerarExtratoSemMva = GerandoExtratoSemMVA(file);
                         ExtratoImposto extratoSemMVA = gerarExtratoSemMva.Item1;
+                        extrato.FormaRecolhimento = "Complementação de alíquota";
                         extratoList.Add(extratoSemMVA);
                         int conta = gerarExtratoSemMva.Item2;
                         if (temMva.Equals(false))
@@ -1081,6 +1056,7 @@ object sender, DataGridViewCellEventArgs e)
                             {
                                 tupla = GerandoExtratoComMVA(file);
                                 extrato = tupla.Item1;
+                                extrato.FormaRecolhimento = "Antecipação com encerramento de fase";
                                 extratoList.Add(extrato);
                             }
                         }
@@ -1098,7 +1074,8 @@ object sender, DataGridViewCellEventArgs e)
         {
             try
             {
-                string mva = dataGridView2.Rows[pos].Cells[7].Value.ToString();
+                string mva = dataGridView2.Rows[pos].Cells[5].Value.ToString();
+                MessageBox.Show(mva);
                 valorProdutoUnitario = RetornaValorProdutoUnitario(caminho, pos).Replace(".", ",");
                 valorICMSOrigem = RetornavalorICMS(caminho, pos);
                 return new Tuple<string, string, string, string>(pIPI, valorICMSOrigem, mva, valorProdutoUnitario);
