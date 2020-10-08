@@ -27,7 +27,7 @@ namespace CalculaImposto
                   
                 }
             }
-            else //se o mva for igual a zero é porque o produto é normal
+            else //se o mva for igual a zero,nulo ou -1 é porque o produto é normal
             {
                 if (pIPI.IsNullOrEmpty()) //o produto não tem pIPI
                 {

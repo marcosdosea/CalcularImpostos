@@ -113,7 +113,7 @@
             this.tabControl1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(961, 680);
+            this.tabControl1.Size = new System.Drawing.Size(898, 586);
             this.tabControl1.TabIndex = 0;
             // 
             // tabPage1
@@ -126,7 +126,7 @@
             this.tabPage1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.tabPage1.Size = new System.Drawing.Size(953, 649);
+            this.tabPage1.Size = new System.Drawing.Size(890, 555);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Notas Fiscais";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -163,7 +163,7 @@
             this.dataGridView1.DataSource = this.notasFiscaisBindingSource;
             this.dataGridView1.EnableHeadersVisualStyles = false;
             this.dataGridView1.GridColor = System.Drawing.Color.White;
-            this.dataGridView1.Location = new System.Drawing.Point(0, 47);
+            this.dataGridView1.Location = new System.Drawing.Point(-4, 47);
             this.dataGridView1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
@@ -186,7 +186,7 @@
             dataGridViewCellStyle7.SelectionForeColor = System.Drawing.Color.Black;
             this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle7;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView1.Size = new System.Drawing.Size(949, 596);
+            this.dataGridView1.Size = new System.Drawing.Size(894, 505);
             this.dataGridView1.TabIndex = 6;
             // 
             // CnpjFornecedor
@@ -248,7 +248,7 @@
             this.tabPage2.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.tabPage2.Size = new System.Drawing.Size(953, 649);
+            this.tabPage2.Size = new System.Drawing.Size(890, 555);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Imposto NCM";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -295,7 +295,7 @@
             this.dataGridView2.DataSource = this.impostoBindingSource;
             this.dataGridView2.EnableHeadersVisualStyles = false;
             this.dataGridView2.GridColor = System.Drawing.Color.White;
-            this.dataGridView2.Location = new System.Drawing.Point(-4, 42);
+            this.dataGridView2.Location = new System.Drawing.Point(2, 42);
             this.dataGridView2.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.dataGridView2.Name = "dataGridView2";
             dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -315,7 +315,7 @@
             dataGridViewCellStyle10.SelectionForeColor = System.Drawing.Color.Black;
             this.dataGridView2.RowsDefaultCellStyle = dataGridViewCellStyle10;
             this.dataGridView2.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView2.Size = new System.Drawing.Size(953, 601);
+            this.dataGridView2.Size = new System.Drawing.Size(888, 515);
             this.dataGridView2.TabIndex = 0;
             this.dataGridView2.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView2_CellEndEdit);
             // 
@@ -328,7 +328,7 @@
             this.tabPage3.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.tabPage3.Size = new System.Drawing.Size(953, 649);
+            this.tabPage3.Size = new System.Drawing.Size(890, 555);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Extrato";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -338,7 +338,7 @@
             this.btnAtualizarExtrato.BackColor = System.Drawing.Color.SteelBlue;
             this.btnAtualizarExtrato.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAtualizarExtrato.ForeColor = System.Drawing.Color.White;
-            this.btnAtualizarExtrato.Location = new System.Drawing.Point(634, 6);
+            this.btnAtualizarExtrato.Location = new System.Drawing.Point(568, 6);
             this.btnAtualizarExtrato.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnAtualizarExtrato.Name = "btnAtualizarExtrato";
             this.btnAtualizarExtrato.Size = new System.Drawing.Size(159, 33);
@@ -374,7 +374,7 @@
             this.dataGridView3.DataSource = this.extratoImpostoBindingSource;
             this.dataGridView3.EnableHeadersVisualStyles = false;
             this.dataGridView3.GridColor = System.Drawing.Color.White;
-            this.dataGridView3.Location = new System.Drawing.Point(0, 45);
+            this.dataGridView3.Location = new System.Drawing.Point(2, 45);
             this.dataGridView3.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.dataGridView3.Name = "dataGridView3";
             dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -394,7 +394,7 @@
             dataGridViewCellStyle13.SelectionForeColor = System.Drawing.Color.Black;
             this.dataGridView3.RowsDefaultCellStyle = dataGridViewCellStyle13;
             this.dataGridView3.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView3.Size = new System.Drawing.Size(949, 598);
+            this.dataGridView3.Size = new System.Drawing.Size(890, 507);
             this.dataGridView3.TabIndex = 0;
             // 
             // btnExportar
@@ -402,7 +402,7 @@
             this.btnExportar.BackColor = System.Drawing.Color.SteelBlue;
             this.btnExportar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnExportar.ForeColor = System.Drawing.Color.White;
-            this.btnExportar.Location = new System.Drawing.Point(833, 6);
+            this.btnExportar.Location = new System.Drawing.Point(767, 6);
             this.btnExportar.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnExportar.Name = "btnExportar";
             this.btnExportar.Size = new System.Drawing.Size(91, 33);
@@ -422,7 +422,7 @@
             this.tabPage4.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.tabPage4.Size = new System.Drawing.Size(953, 649);
+            this.tabPage4.Size = new System.Drawing.Size(890, 549);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Configurações";
             // 
@@ -431,7 +431,7 @@
             this.btnBuscar.BackColor = System.Drawing.Color.SteelBlue;
             this.btnBuscar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBuscar.ForeColor = System.Drawing.Color.White;
-            this.btnBuscar.Location = new System.Drawing.Point(820, 30);
+            this.btnBuscar.Location = new System.Drawing.Point(785, 30);
             this.btnBuscar.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnBuscar.Name = "btnBuscar";
             this.btnBuscar.Size = new System.Drawing.Size(74, 34);
@@ -443,7 +443,7 @@
             // textBoxFile
             // 
             this.textBoxFile.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBoxFile.Location = new System.Drawing.Point(294, 38);
+            this.textBoxFile.Location = new System.Drawing.Point(263, 38);
             this.textBoxFile.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.textBoxFile.Name = "textBoxFile";
             this.textBoxFile.ReadOnly = true;
@@ -453,7 +453,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(38, 38);
+            this.label1.Location = new System.Drawing.Point(7, 38);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(252, 18);
@@ -470,7 +470,7 @@
             this.button1.Cursor = System.Windows.Forms.Cursors.Hand;
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Font = new System.Drawing.Font("Times New Roman", 8.25F);
-            this.button1.Location = new System.Drawing.Point(916, 10);
+            this.button1.Location = new System.Drawing.Point(789, 4);
             this.button1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(37, 29);
@@ -635,7 +635,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
-            this.ClientSize = new System.Drawing.Size(964, 700);
+            this.ClientSize = new System.Drawing.Size(899, 600);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
