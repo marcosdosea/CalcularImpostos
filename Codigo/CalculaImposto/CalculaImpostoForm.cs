@@ -52,11 +52,16 @@ namespace CalculaImposto
             {
                 textBoxFile.Text = fBDialog.SelectedPath;
 
+                Properties.Settings.Default.dropbox= textBoxFile.Text;
+
+                Properties.Settings.Default.Save();
+
                 string pastaDropbox = textBoxFile.Text;
                 //atualizar o app.config
                 ConfiguracaoDropbox.UpdateAppSettings("pastaDropbox", pastaDropbox);
 
                 MessageBox.Show("Caminho do Dropbox salvo com sucesso!");
+               
             }
             else
             {
@@ -763,40 +768,47 @@ namespace CalculaImposto
         }
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
-
-            string recuperaArquivo = BuscaArquivoTxt();
-            if (recuperaArquivo != null)
+            if (string.IsNullOrEmpty(caminho) == false)
             {
-                AtualizaArquivoTXT(recuperaArquivo);
+
+                string recuperaArquivo = BuscaArquivoTxt();
+                if (recuperaArquivo != null)
+                {
+                    AtualizaArquivoTXT(recuperaArquivo);
+                }
+                else
+                {
+                    string caminhoCompleto = GerarNomeArquivoTXT();
+                    StreamWriter file = new StreamWriter(caminhoCompleto);
+                    try
+                    {
+
+                        string sLine = "";
+                        for (int i = 0; i <= dataGridView2.RowCount - 1; i++)
+                        { //Crio um for do tamanho da quantidade de linhas existente
+                            sLine = sLine + dataGridView2.Rows[i].Cells[0].Value + ","  //ncm      
+                            + dataGridView2.Rows[i].Cells[2].Value + ","//aliquota de origem 
+                            + dataGridView2.Rows[i].Cells[3].Value + "," //aliquota de destino  
+                            + dataGridView2.Rows[i].Cells[4].Value + ","//data de atualizacao  
+                            + dataGridView2.Rows[i].Cells[5].Value;//mva
+                            sLine = sLine + ",";
+                            file.WriteLine(sLine);
+                            sLine = "";
+                        }
+                        file.Close();
+                        MessageBox.Show("Dados exportados com sucesso.", "Program Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+
+                    catch (Exception err)
+                    {
+                        MessageBox.Show(err.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        file.Close();
+                    }
+                }
             }
             else
             {
-                string caminhoCompleto = GerarNomeArquivoTXT();
-                StreamWriter file = new StreamWriter(caminhoCompleto);
-                try
-                {
-
-                    string sLine = "";
-                    for (int i = 0; i <= dataGridView2.RowCount - 1; i++)
-                    { //Crio um for do tamanho da quantidade de linhas existente
-                        sLine = sLine + dataGridView2.Rows[i].Cells[0].Value + ","  //ncm      
-                        + dataGridView2.Rows[i].Cells[2].Value + ","//aliquota de origem 
-                        + dataGridView2.Rows[i].Cells[3].Value + "," //aliquota de destino  
-                        + dataGridView2.Rows[i].Cells[4].Value + ","//data de atualizacao  
-                        + dataGridView2.Rows[i].Cells[5].Value;//mva
-                        sLine = sLine + ",";
-                        file.WriteLine(sLine);
-                        sLine = "";
-                    }
-                    file.Close();
-                    MessageBox.Show("Dados exportados com sucesso.", "Program Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-
-                catch (Exception err)
-                {
-                    MessageBox.Show(err.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    file.Close();
-                }
+                MessageBox.Show("Selecione primeiro um arquivo nota fiscal *.xml.");
             }
         }
 
@@ -850,50 +862,63 @@ object sender, DataGridViewCellEventArgs e)
         #region Tarefa 3 - Terceira Grid
         private void btnExportar_Click(object sender, EventArgs e)
         {
-            SaveFileDialog salvar = new SaveFileDialog();
-            // Aplicação Excel
-            Excel.Application App;
-            Excel.Workbook WorkBook;
-            Excel.Worksheet WorkSheet;
-            object misValor = System.Reflection.Missing.Value;
-
-            App = new Excel.Application();
-            WorkBook = App.Workbooks.Add(misValor);
-            WorkSheet = (Excel.Worksheet)WorkBook.Worksheets.get_Item(1);
-            int i = 0;
-            int j = 0;
-
-            // Passa as celulas do DataGridView para a Pasta do Excel
-            for (i = 0; i <= dataGridView3.RowCount - 1; i++)
+            if (string.IsNullOrEmpty(caminho) == false)
             {
-                for (j = 0; j <= dataGridView3.ColumnCount - 1; j++)
+
+                //  SaveFileDialog salvar = new SaveFileDialog();
+                // Aplicação Excel
+                Excel.Application App;
+                Excel.Workbook WorkBook;
+                Excel.Worksheet WorkSheet;
+                object misValor = System.Reflection.Missing.Value;
+
+                App = new Excel.Application();
+                WorkBook = App.Workbooks.Add(misValor);
+                WorkSheet = (Excel.Worksheet)WorkBook.Worksheets.get_Item(1);
+                int i = 0;
+                int j = 0;
+
+                // Passa as celulas do DataGridView para a Pasta do Excel
+                for (i = 0; i <= dataGridView3.RowCount - 1; i++)
                 {
-                    DataGridViewCell cell = dataGridView3[j, i];
-                    WorkSheet.Cells[i + 1, j + 1] = cell.Value;
+                    for (j = 0; j <= dataGridView3.ColumnCount - 1; j++)
+                    {
+                        DataGridViewCell cell = dataGridView3[j, i];
+                        WorkSheet.Cells[1, 1] = "Nr da Nota Fiscal";
+                        WorkSheet.Cells[1, 2] = "Vl. da Nota F.";
+                        WorkSheet.Cells[1, 3] = "Valor ICMS Calculado";
+                        WorkSheet.Cells[1, 4] = "Valor Analisado";
+                        WorkSheet.Cells[1, 5] = "Valor Recolher";
+                        WorkSheet.Cells[i + 1, j + 1] = cell.Value;
+                    }
                 }
+
+                //Gera um nome para novo arquivo
+                Random numAleatorio = new Random();
+                int valorInteiro = numAleatorio.Next();
+                DateTime dataHoje = DateTime.Today;
+                string data = dataHoje.ToString("D");
+                string nomeArquivo = "Extrato-" + data + " " + valorInteiro + ".xls";
+
+                string[] pasta = { value, nomeArquivo };
+                string caminhoCompleto = Path.Combine(pasta);
+
+                // define algumas propriedades da caixa salvar
+                //    salvar.Title = "Exportar para Excel";
+                // salvar.Filter = "Arquivo do Excel *.xls | *.xls";
+                // salvar.ShowDialog(); // mostra
+
+                //salva na pasta virtual escolhida 
+                WorkBook.SaveAs(caminhoCompleto, Excel.XlFileFormat.xlWorkbookNormal, misValor, misValor, misValor, misValor,
+
+                Excel.XlSaveAsAccessMode.xlExclusive, misValor, misValor, misValor, misValor, misValor);
+                WorkBook.Close(true, misValor, misValor);
+                App.Quit();
             }
-
-            //Gera um nome para novo arquivo
-            Random numAleatorio = new Random();
-            int valorInteiro = numAleatorio.Next();
-            DateTime dataHoje = DateTime.Today;
-            string data = dataHoje.ToString("D");
-            string nomeArquivo = "Extrato-" + data + " " + valorInteiro + ".xls";
-
-            string[] pasta = { value, nomeArquivo };
-            string caminhoCompleto = Path.Combine(pasta);
-
-            // define algumas propriedades da caixa salvar
-            salvar.Title = "Exportar para Excel";
-            salvar.Filter = "Arquivo do Excel *.xls | *.xls";
-            salvar.ShowDialog(); // mostra
-            
-            //salva na pasta virtual escolhida 
-            WorkBook.SaveAs(caminhoCompleto, Excel.XlFileFormat.xlWorkbookNormal, misValor, misValor, misValor, misValor,
-
-            Excel.XlSaveAsAccessMode.xlExclusive, misValor, misValor, misValor, misValor, misValor);
-            WorkBook.Close(true, misValor, misValor);
-            App.Quit();
+            else
+            {
+                MessageBox.Show("Selecione primeiro um arquivo Nota Fiscal *.xml");
+            }
         }
         private Boolean verificaTemMVA(string ncm, string aliO)
         {
@@ -1107,24 +1132,26 @@ object sender, DataGridViewCellEventArgs e)
         
         private void btnGerarExtrato_Click(object sender, EventArgs e)
         {
-            List<ExtratoImposto> extratoList = new List<ExtratoImposto>();
-            if (caminho.EndsWith("xml"))
-            //apenas 1 nota fiscal foi aberta, não necessita do foreach para ler cada nota xml desserializada separadamente
+            if (string.IsNullOrEmpty(caminho) == false)
             {
-                Boolean temMva = false;
-                Boolean algumProdutoTemMVA = verificaMVAGrid();
-                if (algumProdutoTemMVA.Equals(true))
+                List<ExtratoImposto> extratoList = new List<ExtratoImposto>();
+                if (caminho.EndsWith("xml"))
+                //apenas 1 nota fiscal foi aberta, não necessita do foreach para ler cada nota xml desserializada separadamente
                 {
+                    Boolean temMva = false;
+                    Boolean algumProdutoTemMVA = verificaMVAGrid();
+                    if (algumProdutoTemMVA.Equals(true))
+                    {
                         var gerarExtratoComMva = GerandoExtratoComMVA(caminho);
                         ExtratoImposto extratoComMva = gerarExtratoComMva.Item1;
                         int contSemMva = gerarExtratoComMva.Item2;
                         temMva = gerarExtratoComMva.Item3;
                         if (temMva.Equals(true))
                         {
-                        extratoComMva.FormaRecolhimento = "Antecipação com encerramento de fase";
-                        extratoList.Add(extratoComMva);
+                            extratoComMva.FormaRecolhimento = "Antecipação com encerramento de fase";
+                            extratoList.Add(extratoComMva);
                         }
-                                        
+
                         if (contSemMva > 0)
                         {
                             var gerarExtratoSemMva = GerandoExtratoSemMVA(caminho);
@@ -1134,35 +1161,40 @@ object sender, DataGridViewCellEventArgs e)
                             extratoList.Add(extratoSemMVA);
                         }
                     }
-                else
-                {
-                    var gerarExtratoSemMva = GerandoExtratoSemMVA(caminho);
-                    ExtratoImposto extratoSemMVA = gerarExtratoSemMva.Item1;
-                    Boolean naotemMva = gerarExtratoSemMva.Item3;
-                    if (naotemMva.Equals(false))
+                    else
                     {
-                        extratoSemMVA.FormaRecolhimento = "Complementação de alíquota";
-                        extratoList.Add(extratoSemMVA);
-                    }
-                    int conta = gerarExtratoSemMva.Item2;
-                    if (temMva.Equals(false) && conta > 0)
-                    {
-                        var gerarExtratoComMva = GerandoExtratoComMVA(caminho);
-                        ExtratoImposto extratoComMva = gerarExtratoComMva.Item1;
-                        extratoComMva.FormaRecolhimento = "Antecipação com encerramento de fase";
-                        extratoList.Add(extratoComMva);
+                        var gerarExtratoSemMva = GerandoExtratoSemMVA(caminho);
+                        ExtratoImposto extratoSemMVA = gerarExtratoSemMva.Item1;
+                        Boolean naotemMva = gerarExtratoSemMva.Item3;
+                        if (naotemMva.Equals(false))
+                        {
+                            extratoSemMVA.FormaRecolhimento = "Complementação de alíquota";
+                            extratoList.Add(extratoSemMVA);
+                        }
+                        int conta = gerarExtratoSemMva.Item2;
+                        if (temMva.Equals(false) && conta > 0)
+                        {
+                            var gerarExtratoComMva = GerandoExtratoComMVA(caminho);
+                            ExtratoImposto extratoComMva = gerarExtratoComMva.Item1;
+                            extratoComMva.FormaRecolhimento = "Antecipação com encerramento de fase";
+                            extratoList.Add(extratoComMva);
+                        }
                     }
                 }
-                  }   
+                else
+                {
+                    ExtratoNotas(extratoList);
+                }
+
+                this.extratoImpostoBindingSource.DataSource = extratoList;
+
+                this.dataGridView3.DataSource =
+                    this.extratoImpostoBindingSource.DataSource;
+            }
             else
             {
-                ExtratoNotas(extratoList);
+                MessageBox.Show("Selecione primeiro um arquivo *.xml");
             }
-
-            this.extratoImpostoBindingSource.DataSource = extratoList;
-
-            this.dataGridView3.DataSource =
-                this.extratoImpostoBindingSource.DataSource;
         }
        
         public Tuple<string, string,string> DadosSegundaGridParaCalculoIcms(int pos, string caminho, string pIPI)
