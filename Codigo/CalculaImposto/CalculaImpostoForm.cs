@@ -774,17 +774,16 @@ namespace CalculaImposto
                 string recuperaArquivo = BuscaArquivoTxt();
                 if (recuperaArquivo != null)
                 {
-                    MessageBox.Show("RecuperaArquivo "+recuperaArquivo);
                     AtualizaArquivoTXT(recuperaArquivo);
                 }
                 else
                 {
-                    SaveFileDialog salvar = new SaveFileDialog();
+                    /*SaveFileDialog salvar = new SaveFileDialog();
                     salvar.Title = "Salvar arquivo txt";
                     salvar.Filter = "Arquivo txt *.txt | *.txt";
-                    salvar.ShowDialog(); // mostra
+                    salvar.ShowDialog(); // mostra*/
                     string caminhoCompleto = GerarNomeArquivoTXT();
-                    StreamWriter file = new StreamWriter(salvar.FileName);
+                    StreamWriter file = new StreamWriter(caminhoCompleto);
                     try
                     {
 
