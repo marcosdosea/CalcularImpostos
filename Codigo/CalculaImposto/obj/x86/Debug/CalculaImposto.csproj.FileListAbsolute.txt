@@ -20,7 +20,6 @@ C:\Users\MAGAZINE\Documents\CalcularImpostos\Codigo\CalculaImposto\obj\x86\Debug
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\CalculaImposto.exe.config
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\Newtonsoft.Json.dll
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\Newtonsoft.Json.xml
-C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.csprojAssemblyReference.cache
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\Interop.WMPLib.dll
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\AxInterop.WMPLib.dll
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.csproj.ResolveComReference.cache
@@ -441,3 +440,4 @@ C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\ru
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\tr\Microsoft.VisualStudio.Services.WebApi.resources.dll
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\zh-Hans\Microsoft.VisualStudio.Services.WebApi.resources.dll
 C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\bin\Debug\zh-Hant\Microsoft.VisualStudio.Services.WebApi.resources.dll
+C:\Users\barbi\Source\Repos\CalcularImpostos3\Codigo\CalculaImposto\obj\x86\Debug\CalculaImposto.csprojAssemblyReference.cache

@@ -248,6 +248,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CalculaIcmsAntecipado.cs" />
     <Compile Include="CalculaImpostoForm.cs">
       <SubType>Form</SubType>
     </Compile>
