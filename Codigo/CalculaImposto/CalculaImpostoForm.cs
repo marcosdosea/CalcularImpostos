@@ -6,6 +6,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 using System.Windows.Forms;
 using System.Xml;
 using Microsoft.TeamFoundation.Common;
+using Microsoft.VisualStudio.Services.CircuitBreaker;
 
 namespace CalculaImposto
 {
@@ -278,6 +279,11 @@ namespace CalculaImposto
                 for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
                 {
                     buscaAliquotaOrigem = RetornapAliquotaOrigem(arquivo, pos);
+                     if (String.IsNullOrWhiteSpace(buscaAliquotaOrigem))
+                        {
+                            buscaAliquotaOrigem = "12";
+                         
+                        }
                    
                     imposto = ImpostoNotaFiscal(pos, DesserializarNota(arquivo));
                     Boolean verifica = PesquisaImpostoList(impostoList, imposto.NCM, imposto.AliquotaOrigem);
@@ -995,17 +1001,20 @@ object sender, DataGridViewCellEventArgs e)
                 Imposto imposto = ImpostoNotaFiscal(linha, DesserializarNota(file));
                 string ncmNotaFiscal = imposto.NCM;  
                 icmsAntecipado = new CalculaIcmsAntecipado();
-                Boolean verificarpIPI = verificapIPI(file, linha);//tem que ser pela quantidade de produtos na nota fiscal
-                if (verificarpIPI.Equals(true))
+                Boolean verificarIPI= verificaIPI(file, linha);
+                if (verificarIPI.Equals(true))
                 {
-                    recuperapIPI = RetornapIPI(file, linha, pos);
-                    pos++;
+                    Boolean verificarpIPI = verificapIPI(file, linha);//tem que ser pela quantidade de produtos na nota fiscal
+                    if (verificarpIPI.Equals(true))
+                    {
+                        recuperapIPI = RetornapIPI(file, linha);
+                        pos++;
+                    }
+                    else
+                    {
+                        recuperapIPI = null;
+                    }
                 }
-                else
-                {
-                    recuperapIPI = null;
-                }
-               
                 temMva = verificaTemMVA(ncmNotaFiscal, buscaAliquotaOrigem);
                
                 if (temMva.Equals(false)) 
@@ -1060,15 +1069,19 @@ object sender, DataGridViewCellEventArgs e)
                 if (temMva.Equals(true))
                 {
                     icmsAntecipado = new CalculaIcmsAntecipado();
-                    Boolean verificarpIPI = verificapIPI(file, i);
-                    if (verificarpIPI.Equals(true))
+                    Boolean verificarIPI = verificaIPI(file, linha);
+                    if (verificarIPI.Equals(true))
                     {
-                        recuperapIPI = RetornapIPI(file, i, pos);
-                        pos++;
-                    }
-                    else
-                    {
-                        recuperapIPI = null;
+                        Boolean verificarpIPI = verificapIPI(file, linha);
+                        if (verificarpIPI.Equals(true))
+                        {
+                            recuperapIPI = RetornapIPI(file, linha);
+                            pos++;
+                        }
+                        else
+                        {
+                            recuperapIPI = null;
+                        }
                     }
                     string mva=obterMVAGrid(ncmNotaFiscal, buscaAliquotaOrigem);
                     var tupla = DadosSegundaGridParaCalculoIcms(i, file,recuperapIPI);
@@ -1268,17 +1281,18 @@ object sender, DataGridViewCellEventArgs e)
                 return null;
             }
         }
-        public Boolean verificapIPI(string pasta, int pos)
+        public Boolean verificapIPI(string pasta, int pos) 
         {
             XmlDocument xml = new XmlDocument();
             xml.Load(pasta);
-            XmlNodeList detList = xml.GetElementsByTagName("det");
+            XmlNodeList ipiList = xml.GetElementsByTagName("IPI");
             Boolean busca = false;
-            foreach (XmlNode det in detList[pos])
+  
+            foreach (XmlNode det in ipiList[pos])
             {
                 foreach (XmlNode n in det)
                 {
-                    if (n.Name == "IPI")
+                    if (n.Name == "pIPI")
                     {
                         busca = true;
                     }
@@ -1286,51 +1300,57 @@ object sender, DataGridViewCellEventArgs e)
             }
             return busca;
         }
-
-        public string RetornapIPI(string pasta, int pos, int posProduto)
+        public Boolean verificaIPI(string pasta, int pos) 
+        {
+            XmlDocument xml = new XmlDocument();
+            xml.Load(pasta);
+            XmlNodeList ipiList = xml.GetElementsByTagName("imposto");
+            Boolean busca = false;
+           
+            foreach (XmlNode det in ipiList[pos])
+            {
+                foreach (XmlNode n in det.ChildNodes)
+                {
+                    if (n.Name == "IPI" || n.Name=="IPITrib")
+                    {
+                        busca = true;
+                    }
+                }
+            }
+            return busca;
+        }
+        public string RetornapIPI(string pasta, int pos)
         {
             try
             {
                 XmlDocument xml = new XmlDocument();
                 xml.Load(pasta);
-                XmlNodeList detList = xml.GetElementsByTagName("det");
-                XmlNodeList ipi = null;
+                XmlNodeList ipiList = xml.GetElementsByTagName("IPI");
                 var recuperaItem = " ";
                 var format = "";
-                foreach (XmlNode det in detList[pos])
-                {
 
+                foreach (XmlNode det in ipiList[pos])
+                {
                     foreach (XmlNode n in det)
                     {
-                        if (n.Name == "IPI")
+                        if (n.Name == "pIPI")
                         {
-                            ipi = xml.GetElementsByTagName("IPI");
-                            foreach (XmlNode busca in ipi)
-                            {
-                                XmlNodeList ipitrib = xml.GetElementsByTagName("IPITrib");
-                                for (int i = 0; i < ipitrib.Count; i++)
-                                {
-                                    if (i == posProduto)
-                                    {
-                                        recuperaItem = ipitrib[i]["pIPI"].InnerText;
-                                    }
-                                }
-                            }
+                            recuperaItem = n.InnerText;
                         }
                     }
                 }
-
-                if (recuperaItem != null)
+                if (recuperaItem != " ")
                 {
                     format = recuperaItem;
                     format = format.Replace(".", " ");
                     format = format.TrimEnd('0', ' ');
                 }
+
                 return format;
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format("Não foi possível retornar o IPI. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format("Não foi possível retornar a porcentagem do IPI na nota fiscal. Erro: {0}", ex.Message), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
         }

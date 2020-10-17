@@ -18,24 +18,30 @@ namespace CalculaImposto
                 {
                    
                     PrecoGoverno = valorCompra * (mva / 100);
-                    
+                    MessageBox.Show("Produto sem IPI e com MVA = " + PrecoGoverno);
+
                 }
                 else //adiciona uma linha para os produtos que NÃo tem mva
                 {
                     
                     PrecoGoverno = ((valorCompra + Convert.ToDecimal(pIPI)) * (mva / 100)) + Convert.ToDecimal(pIPI);
-                  
+                    MessageBox.Show("Produto com IPI e com MVA = " + PrecoGoverno);
+
                 }
             }
             else //se o mva for igual a zero,nulo ou -1 é porque o produto é normal
             {
                 if (pIPI.IsNullOrEmpty()) //o produto não tem pIPI
                 {
+                   
                     PrecoGoverno = valorCompra;
+                    MessageBox.Show("Produto sem IPI e sem MVA= "+ PrecoGoverno);
                 }
                 else //o produto tem pIPI
                 {
                     PrecoGoverno = valorCompra + Convert.ToDecimal(pIPI);
+                    MessageBox.Show("IPI= " + pIPI);
+                    MessageBox.Show("Produto com IPI e sem MVA = "+PrecoGoverno);
                 }
             }     
             return PrecoGoverno;
@@ -44,6 +50,7 @@ namespace CalculaImposto
         {
             decimal multiplica = precoGoverno * 18/100;
             ICMSAntecipado = multiplica - valorICMCompra;
+            MessageBox.Show("Valor icms = "+ valorICMCompra);
             return Math.Round(ICMSAntecipado,2);
         }
     }
