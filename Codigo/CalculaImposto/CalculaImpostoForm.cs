@@ -774,12 +774,17 @@ namespace CalculaImposto
                 string recuperaArquivo = BuscaArquivoTxt();
                 if (recuperaArquivo != null)
                 {
+                    MessageBox.Show("RecuperaArquivo "+recuperaArquivo);
                     AtualizaArquivoTXT(recuperaArquivo);
                 }
                 else
                 {
+                    SaveFileDialog salvar = new SaveFileDialog();
+                    salvar.Title = "Salvar arquivo txt";
+                    salvar.Filter = "Arquivo txt *.txt | *.txt";
+                    salvar.ShowDialog(); // mostra
                     string caminhoCompleto = GerarNomeArquivoTXT();
-                    StreamWriter file = new StreamWriter(caminhoCompleto);
+                    StreamWriter file = new StreamWriter(salvar.FileName);
                     try
                     {
 
@@ -865,7 +870,7 @@ object sender, DataGridViewCellEventArgs e)
             if (string.IsNullOrEmpty(caminho) == false)
             {
 
-                //  SaveFileDialog salvar = new SaveFileDialog();
+                  SaveFileDialog salvar = new SaveFileDialog();
                 // Aplicação Excel
                 Excel.Application App;
                 Excel.Workbook WorkBook;
@@ -904,12 +909,12 @@ object sender, DataGridViewCellEventArgs e)
                 string caminhoCompleto = Path.Combine(pasta);
 
                 // define algumas propriedades da caixa salvar
-                //    salvar.Title = "Exportar para Excel";
-                // salvar.Filter = "Arquivo do Excel *.xls | *.xls";
-                // salvar.ShowDialog(); // mostra
+                 salvar.Title = "Exportar para Excel";
+                 salvar.Filter = "Arquivo do Excel *.xls | *.xls";
+                 salvar.ShowDialog(); // mostra
 
                 //salva na pasta virtual escolhida 
-                WorkBook.SaveAs(caminhoCompleto, Excel.XlFileFormat.xlWorkbookNormal, misValor, misValor, misValor, misValor,
+                WorkBook.SaveAs(salvar.FileName, Excel.XlFileFormat.xlWorkbookNormal, misValor, misValor, misValor, misValor,
 
                 Excel.XlSaveAsAccessMode.xlExclusive, misValor, misValor, misValor, misValor, misValor);
                 WorkBook.Close(true, misValor, misValor);

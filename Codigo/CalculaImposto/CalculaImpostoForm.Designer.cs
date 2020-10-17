@@ -109,11 +109,11 @@
             this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Cursor = System.Windows.Forms.Cursors.Hand;
             this.tabControl1.Font = new System.Drawing.Font("Verdana", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tabControl1.Location = new System.Drawing.Point(0, 12);
+            this.tabControl1.Location = new System.Drawing.Point(0, 23);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(898, 586);
+            this.tabControl1.Size = new System.Drawing.Size(1024, 575);
             this.tabControl1.TabIndex = 0;
             // 
             // tabPage1
@@ -126,7 +126,7 @@
             this.tabPage1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.tabPage1.Size = new System.Drawing.Size(890, 555);
+            this.tabPage1.Size = new System.Drawing.Size(1016, 544);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Notas Fiscais";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -138,7 +138,7 @@
             this.dataGridView1.AutoGenerateColumns = false;
             this.dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridView1.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
-            this.dataGridView1.BackgroundColor = System.Drawing.Color.LightBlue;
+            this.dataGridView1.BackgroundColor = System.Drawing.Color.SteelBlue;
             this.dataGridView1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dataGridView1.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
             this.dataGridView1.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
@@ -186,7 +186,7 @@
             dataGridViewCellStyle7.SelectionForeColor = System.Drawing.Color.Black;
             this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle7;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView1.Size = new System.Drawing.Size(894, 505);
+            this.dataGridView1.Size = new System.Drawing.Size(1018, 505);
             this.dataGridView1.TabIndex = 6;
             // 
             // CnpjFornecedor
@@ -211,7 +211,7 @@
             this.btnBuscarNfe.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnBuscarNfe.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBuscarNfe.ForeColor = System.Drawing.Color.White;
-            this.btnBuscarNfe.Location = new System.Drawing.Point(756, 6);
+            this.btnBuscarNfe.Location = new System.Drawing.Point(897, 3);
             this.btnBuscarNfe.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnBuscarNfe.Name = "btnBuscarNfe";
             this.btnBuscarNfe.Size = new System.Drawing.Size(112, 35);
@@ -223,11 +223,11 @@
             // textBox1
             // 
             this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox1.Location = new System.Drawing.Point(222, 10);
+            this.textBox1.Location = new System.Drawing.Point(211, 10);
             this.textBox1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(521, 20);
+            this.textBox1.Size = new System.Drawing.Size(682, 20);
             this.textBox1.TabIndex = 4;
             // 
             // label2
@@ -248,7 +248,7 @@
             this.tabPage2.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.tabPage2.Size = new System.Drawing.Size(890, 555);
+            this.tabPage2.Size = new System.Drawing.Size(1016, 555);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Imposto NCM";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -258,7 +258,7 @@
             this.btnSalvar.BackColor = System.Drawing.Color.SteelBlue;
             this.btnSalvar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSalvar.ForeColor = System.Drawing.Color.White;
-            this.btnSalvar.Location = new System.Drawing.Point(766, 3);
+            this.btnSalvar.Location = new System.Drawing.Point(907, 6);
             this.btnSalvar.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnSalvar.Name = "btnSalvar";
             this.btnSalvar.Size = new System.Drawing.Size(88, 33);
@@ -271,7 +271,7 @@
             // 
             this.dataGridView2.AutoGenerateColumns = false;
             this.dataGridView2.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dataGridView2.BackgroundColor = System.Drawing.Color.LightBlue;
+            this.dataGridView2.BackgroundColor = System.Drawing.Color.SteelBlue;
             this.dataGridView2.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dataGridView2.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
             this.dataGridView2.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
@@ -315,7 +315,7 @@
             dataGridViewCellStyle10.SelectionForeColor = System.Drawing.Color.Black;
             this.dataGridView2.RowsDefaultCellStyle = dataGridViewCellStyle10;
             this.dataGridView2.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView2.Size = new System.Drawing.Size(888, 515);
+            this.dataGridView2.Size = new System.Drawing.Size(1012, 515);
             this.dataGridView2.TabIndex = 0;
             this.dataGridView2.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView2_CellEndEdit);
             // 
@@ -328,7 +328,7 @@
             this.tabPage3.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.tabPage3.Size = new System.Drawing.Size(890, 555);
+            this.tabPage3.Size = new System.Drawing.Size(1016, 555);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Extrato";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -338,7 +338,7 @@
             this.btnAtualizarExtrato.BackColor = System.Drawing.Color.SteelBlue;
             this.btnAtualizarExtrato.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAtualizarExtrato.ForeColor = System.Drawing.Color.White;
-            this.btnAtualizarExtrato.Location = new System.Drawing.Point(568, 6);
+            this.btnAtualizarExtrato.Location = new System.Drawing.Point(755, 6);
             this.btnAtualizarExtrato.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnAtualizarExtrato.Name = "btnAtualizarExtrato";
             this.btnAtualizarExtrato.Size = new System.Drawing.Size(159, 33);
@@ -351,7 +351,7 @@
             // 
             this.dataGridView3.AutoGenerateColumns = false;
             this.dataGridView3.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dataGridView3.BackgroundColor = System.Drawing.Color.LightBlue;
+            this.dataGridView3.BackgroundColor = System.Drawing.Color.SteelBlue;
             this.dataGridView3.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dataGridView3.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
             this.dataGridView3.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
@@ -394,7 +394,7 @@
             dataGridViewCellStyle13.SelectionForeColor = System.Drawing.Color.Black;
             this.dataGridView3.RowsDefaultCellStyle = dataGridViewCellStyle13;
             this.dataGridView3.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView3.Size = new System.Drawing.Size(890, 507);
+            this.dataGridView3.Size = new System.Drawing.Size(1010, 507);
             this.dataGridView3.TabIndex = 0;
             // 
             // btnExportar
@@ -402,7 +402,7 @@
             this.btnExportar.BackColor = System.Drawing.Color.SteelBlue;
             this.btnExportar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnExportar.ForeColor = System.Drawing.Color.White;
-            this.btnExportar.Location = new System.Drawing.Point(767, 6);
+            this.btnExportar.Location = new System.Drawing.Point(918, 6);
             this.btnExportar.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnExportar.Name = "btnExportar";
             this.btnExportar.Size = new System.Drawing.Size(91, 33);
@@ -422,7 +422,7 @@
             this.tabPage4.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.tabPage4.Size = new System.Drawing.Size(890, 549);
+            this.tabPage4.Size = new System.Drawing.Size(1016, 555);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Configurações";
             // 
@@ -431,7 +431,7 @@
             this.btnBuscar.BackColor = System.Drawing.Color.SteelBlue;
             this.btnBuscar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBuscar.ForeColor = System.Drawing.Color.White;
-            this.btnBuscar.Location = new System.Drawing.Point(785, 30);
+            this.btnBuscar.Location = new System.Drawing.Point(921, 116);
             this.btnBuscar.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnBuscar.Name = "btnBuscar";
             this.btnBuscar.Size = new System.Drawing.Size(74, 34);
@@ -443,17 +443,19 @@
             // textBoxFile
             // 
             this.textBoxFile.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBoxFile.Location = new System.Drawing.Point(263, 38);
+            this.textBoxFile.Location = new System.Drawing.Point(257, 124);
             this.textBoxFile.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.textBoxFile.Name = "textBoxFile";
             this.textBoxFile.ReadOnly = true;
-            this.textBoxFile.Size = new System.Drawing.Size(509, 20);
+            this.textBoxFile.Size = new System.Drawing.Size(651, 20);
             this.textBoxFile.TabIndex = 1;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 38);
+            this.label1.BackColor = System.Drawing.Color.Transparent;
+            this.label1.ForeColor = System.Drawing.Color.White;
+            this.label1.Location = new System.Drawing.Point(4, 124);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(252, 18);
@@ -470,7 +472,8 @@
             this.button1.Cursor = System.Windows.Forms.Cursors.Hand;
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Font = new System.Drawing.Font("Times New Roman", 8.25F);
-            this.button1.Location = new System.Drawing.Point(789, 4);
+            this.button1.ForeColor = System.Drawing.Color.White;
+            this.button1.Location = new System.Drawing.Point(981, 12);
             this.button1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(37, 29);
@@ -635,7 +638,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
-            this.ClientSize = new System.Drawing.Size(899, 600);
+            this.ClientSize = new System.Drawing.Size(1024, 600);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
