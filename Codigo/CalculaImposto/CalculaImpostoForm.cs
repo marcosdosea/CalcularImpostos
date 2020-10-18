@@ -980,79 +980,16 @@ object sender, DataGridViewCellEventArgs e)
             }
             return mva;
         }
-        private Tuple<ExtratoImposto, int,Boolean> GerandoExtratoSemMVA(string file)
+        private Tuple<ExtratoImposto, ExtratoImposto> GerandoExtrato(string file)
         {
-            ExtratoImposto extrato;
-            CalculaIcmsAntecipado icmsAntecipado;
-            int linha = 0;
-            int pos = 0;
-            int cont = 0;
-            Boolean temMva=false;
-            string recuperapIPI = null;
-            decimal somaProdutoComMVA = 0;
-            int quantidadeProdutosNotaF = ContaItensNotaFiscal(file);
-            for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
-            {
-                buscaAliquotaOrigem = RetornapAliquotaOrigem(file, linha);
-                if (String.IsNullOrWhiteSpace(buscaAliquotaOrigem))
-                {
-                    buscaAliquotaOrigem = "12";
-                }
-                Imposto imposto = ImpostoNotaFiscal(linha, DesserializarNota(file));
-                string ncmNotaFiscal = imposto.NCM;  
-                icmsAntecipado = new CalculaIcmsAntecipado();
-                Boolean verificarIPI= verificaIPI(file, linha);
-                if (verificarIPI.Equals(true))
-                {
-                    Boolean verificarpIPI = verificapIPI(file, linha);//tem que ser pela quantidade de produtos na nota fiscal
-                    if (verificarpIPI.Equals(true))
-                    {
-                        recuperapIPI = RetornapIPI(file, linha);
-                        pos++;
-                    }
-                    else
-                    {
-                        recuperapIPI = null;
-                    }
-                }
-                temMva = verificaTemMVA(ncmNotaFiscal, buscaAliquotaOrigem);
-               
-                if (temMva.Equals(false)) 
-                {
-                    var tupla = DadosSegundaGridParaCalculoIcms(linha, file, recuperapIPI);
-                    string valorICMSOrigem = tupla.Item1;
-                    string valorProduto = tupla.Item2;
-                    string Ipi = tupla.Item3;
-                    precoGoverno = icmsAntecipado.CalculaPrecoGoverno(0, Ipi, Convert.ToDecimal(valorProduto));
-                    somaProdutoComMVA = somaProdutoComMVA + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(valorICMSOrigem));
-                }
-                else
-                {
-                    cont++;     
-                }
-
-                linha++;
-            }
-            if (somaProdutoComMVA != 0)
-            {
-                extrato = ExtratoGrid(DesserializarNota(file), somaProdutoComMVA);
-            }
-            else
-            {
-                extrato = null;
-            }
-            return new Tuple<ExtratoImposto, int, Boolean>(extrato, cont, temMva);
-        }
-        private Tuple<ExtratoImposto, int, Boolean> GerandoExtratoComMVA(string file)
-        {
-            ExtratoImposto extrato;
+            ExtratoImposto extratoComMva;
+            ExtratoImposto extratoSemMva;
             CalculaIcmsAntecipado icmsAntecipado;
             Boolean temMva = false;
             int linha = 0;
-            int pos = 0;
-            int cont = 0;
             string recuperapIPI = null;
             decimal somaProdutoComMVA = 0;
+            decimal somaProdutoSemMVA = 0;
             int quantidadeProdutosNotaF = ContaItensNotaFiscal(file);
             for (int i = 0; i <= quantidadeProdutosNotaF - 1; i++)
             {
@@ -1060,31 +997,31 @@ object sender, DataGridViewCellEventArgs e)
                 if (String.IsNullOrWhiteSpace(buscaAliquotaOrigem))
                 {
                     buscaAliquotaOrigem = "12";
-                  
                 }
                 Imposto imposto = ImpostoNotaFiscal(i, DesserializarNota(file));
                 string ncmNotaFiscal = imposto.NCM;
+              //  MessageBox.Show("NCM = "+ncmNotaFiscal);
                 temMva = verificaTemMVA(ncmNotaFiscal, buscaAliquotaOrigem);
-             
+                icmsAntecipado = new CalculaIcmsAntecipado();
+                Boolean verificarIPI = verificaIPI(file, linha);
+                if (verificarIPI.Equals(true))
+                {
+                    Boolean verificarpIPI = verificapIPI(file, linha);
+                    if (verificarpIPI.Equals(true))
+                    {
+                        recuperapIPI = RetornapIPI(file, linha);
+                    }
+                    else
+                    {
+                        recuperapIPI = null;
+                    }
+                }
+
                 if (temMva.Equals(true))
                 {
-                    icmsAntecipado = new CalculaIcmsAntecipado();
-                    Boolean verificarIPI = verificaIPI(file, linha);
-                    if (verificarIPI.Equals(true))
-                    {
-                        Boolean verificarpIPI = verificapIPI(file, linha);
-                        if (verificarpIPI.Equals(true))
-                        {
-                            recuperapIPI = RetornapIPI(file, linha);
-                            pos++;
-                        }
-                        else
-                        {
-                            recuperapIPI = null;
-                        }
-                    }
-                    string mva=obterMVAGrid(ncmNotaFiscal, buscaAliquotaOrigem);
-                    var tupla = DadosSegundaGridParaCalculoIcms(i, file,recuperapIPI);
+                    
+                    string mva = obterMVAGrid(ncmNotaFiscal, buscaAliquotaOrigem);
+                    var tupla = DadosSegundaGridParaCalculoIcms(i, file, recuperapIPI);
                     string valorICMSOrigem = tupla.Item1;
                     string valorProduto = tupla.Item2;
                     string Ipi = tupla.Item3;
@@ -1093,19 +1030,32 @@ object sender, DataGridViewCellEventArgs e)
                 }
                 else
                 {
-                    cont++;
+                    var tupla = DadosSegundaGridParaCalculoIcms(linha, file, recuperapIPI);
+                    string valorICMSOrigem = tupla.Item1;
+                    string valorProduto = tupla.Item2;
+                    string Ipi = tupla.Item3;
+                    precoGoverno = icmsAntecipado.CalculaPrecoGoverno(0, Ipi, Convert.ToDecimal(valorProduto));
+                    somaProdutoSemMVA = somaProdutoSemMVA + icmsAntecipado.CalculaICMSAntecipado(precoGoverno, Convert.ToDecimal(valorICMSOrigem));
                 }
                 linha++;
             }
             if (somaProdutoComMVA != 0)
             {
-                extrato = ExtratoGrid(DesserializarNota(file), somaProdutoComMVA);
+                extratoComMva = ExtratoGrid(DesserializarNota(file), somaProdutoComMVA);
             }
             else
             {
-                extrato = null;
+                extratoComMva = null;
             }
-            return new Tuple<ExtratoImposto, int, Boolean>(extrato, cont, temMva);
+            if (somaProdutoSemMVA != 0)
+            {
+                extratoSemMva = ExtratoGrid(DesserializarNota(file), somaProdutoSemMVA);
+            }
+            else
+            {
+                extratoSemMva = null;
+            }
+            return new Tuple<ExtratoImposto,ExtratoImposto>(extratoComMva, extratoSemMva);
         }
         private void ExtratoNotas(List<ExtratoImposto> extratoList)
         {
@@ -1113,38 +1063,21 @@ object sender, DataGridViewCellEventArgs e)
 
             foreach (var file in arquivos)
             {
-               
-                    var gerarExtratoComMva = GerandoExtratoComMVA(file);
-                    ExtratoImposto extratoComMva = gerarExtratoComMva.Item1;
-                    int contSemMva = gerarExtratoComMva.Item2;
-                    Boolean temMva = gerarExtratoComMva.Item3;
-                    if (temMva.Equals(true))
-                    {
 
-                        extratoComMva.FormaRecolhimento = "Antecipação com encerramento de fase";
-                        extratoList.Add(extratoComMva);
-                    }
-
-                if (contSemMva > 0)
+                var gerarExtrato = GerandoExtrato(file);
+                ExtratoImposto extratoComMva = gerarExtrato.Item1;
+                ExtratoImposto extratoSemMva = gerarExtrato.Item2;
+                if (extratoComMva != null)
                 {
-                    var gerarExtratoSemMva = GerandoExtratoSemMVA(file);
-                    ExtratoImposto extratoSemMVA = gerarExtratoSemMva.Item1;
-                    int conta = gerarExtratoSemMva.Item2;
-                    Boolean naotemMva = gerarExtratoSemMva.Item3;
-                    extratoSemMVA.FormaRecolhimento = "Complementação de alíquota";
-                    extratoList.Add(extratoSemMVA);
-                    if (temMva.Equals(false))
-                    {
-                        if (conta > 0)
-                        {
-                            gerarExtratoComMva = GerandoExtratoComMVA(file);
-                            extratoComMva = gerarExtratoComMva.Item1;
-                            extratoComMva.FormaRecolhimento = "Antecipação com encerramento de fase";
-                            extratoList.Add(extratoComMva);
-                        }
-                    }
+                    extratoComMva.FormaRecolhimento = "Antecipação com encerramento de fase";
+                    extratoList.Add(extratoComMva);
                 }
-              }
+                if (extratoSemMva != null)
+                {
+                    extratoSemMva.FormaRecolhimento = "Complementação de alíquota";
+                    extratoList.Add(extratoSemMva);
+                }
+            }
             }
         
         private void btnGerarExtrato_Click(object sender, EventArgs e)
@@ -1155,48 +1088,20 @@ object sender, DataGridViewCellEventArgs e)
                 if (caminho.EndsWith("xml"))
                 //apenas 1 nota fiscal foi aberta, não necessita do foreach para ler cada nota xml desserializada separadamente
                 {
-                    Boolean temMva = false;
-                    Boolean algumProdutoTemMVA = verificaMVAGrid();
-                    if (algumProdutoTemMVA.Equals(true))
+                    var gerarExtrato = GerandoExtrato(caminho);
+                    ExtratoImposto extratoComMva = gerarExtrato.Item1;
+                    ExtratoImposto extratoSemMva = gerarExtrato.Item2;
+                    if (extratoComMva != null)
                     {
-                        var gerarExtratoComMva = GerandoExtratoComMVA(caminho);
-                        ExtratoImposto extratoComMva = gerarExtratoComMva.Item1;
-                        int contSemMva = gerarExtratoComMva.Item2;
-                        temMva = gerarExtratoComMva.Item3;
-                        if (temMva.Equals(true))
-                        {
-                            extratoComMva.FormaRecolhimento = "Antecipação com encerramento de fase";
-                            extratoList.Add(extratoComMva);
-                        }
-
-                        if (contSemMva > 0)
-                        {
-                            var gerarExtratoSemMva = GerandoExtratoSemMVA(caminho);
-                            ExtratoImposto extratoSemMVA = gerarExtratoSemMva.Item1;
-
-                            extratoSemMVA.FormaRecolhimento = "Complementação de alíquota";
-                            extratoList.Add(extratoSemMVA);
-                        }
+                        extratoComMva.FormaRecolhimento = "Antecipação com encerramento de fase";
+                        extratoList.Add(extratoComMva);
                     }
-                    else
+                    if (extratoSemMva != null)
                     {
-                        var gerarExtratoSemMva = GerandoExtratoSemMVA(caminho);
-                        ExtratoImposto extratoSemMVA = gerarExtratoSemMva.Item1;
-                        Boolean naotemMva = gerarExtratoSemMva.Item3;
-                        if (naotemMva.Equals(false))
-                        {
-                            extratoSemMVA.FormaRecolhimento = "Complementação de alíquota";
-                            extratoList.Add(extratoSemMVA);
-                        }
-                        int conta = gerarExtratoSemMva.Item2;
-                        if (temMva.Equals(false) && conta > 0)
-                        {
-                            var gerarExtratoComMva = GerandoExtratoComMVA(caminho);
-                            ExtratoImposto extratoComMva = gerarExtratoComMva.Item1;
-                            extratoComMva.FormaRecolhimento = "Antecipação com encerramento de fase";
-                            extratoList.Add(extratoComMva);
-                        }
+                        extratoSemMva.FormaRecolhimento = "Complementação de alíquota";
+                        extratoList.Add(extratoSemMva);
                     }
+                   
                 }
                 else
                 {

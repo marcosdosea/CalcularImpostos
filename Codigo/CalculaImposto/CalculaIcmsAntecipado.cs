@@ -18,14 +18,14 @@ namespace CalculaImposto
                 {
                    
                     PrecoGoverno = valorCompra * (mva / 100);
-                    MessageBox.Show("Produto sem IPI e com MVA = " + PrecoGoverno);
+                  //  MessageBox.Show("Produto sem IPI e com MVA = " + PrecoGoverno);
 
                 }
-                else //adiciona uma linha para os produtos que NÃo tem mva
+                else 
                 {
                     
-                    PrecoGoverno = ((valorCompra + Convert.ToDecimal(pIPI)) * (mva / 100)) + Convert.ToDecimal(pIPI);
-                    MessageBox.Show("Produto com IPI e com MVA = " + PrecoGoverno);
+                    PrecoGoverno = ((valorCompra + Convert.ToDecimal(pIPI))* (mva / 100)) + Convert.ToDecimal(pIPI);
+                 //   MessageBox.Show("Produto com IPI e com MVA = " + PrecoGoverno);
 
                 }
             }
@@ -35,13 +35,14 @@ namespace CalculaImposto
                 {
                    
                     PrecoGoverno = valorCompra;
-                    MessageBox.Show("Produto sem IPI e sem MVA= "+ PrecoGoverno);
+                  ///  MessageBox.Show("Produto sem IPI e sem MVA= "+ PrecoGoverno);
                 }
                 else //o produto tem pIPI
                 {
                     PrecoGoverno = valorCompra + Convert.ToDecimal(pIPI);
-                    MessageBox.Show("IPI= " + pIPI);
-                    MessageBox.Show("Produto com IPI e sem MVA = "+PrecoGoverno);
+                 //   MessageBox.Show("valorCompra= " + valorCompra);
+                 //   MessageBox.Show("IPI= " + pIPI);
+                 //   MessageBox.Show("Produto com IPI e sem MVA = "+PrecoGoverno);
                 }
             }     
             return PrecoGoverno;
@@ -50,7 +51,8 @@ namespace CalculaImposto
         {
             decimal multiplica = precoGoverno * 18/100;
             ICMSAntecipado = multiplica - valorICMCompra;
-            MessageBox.Show("Valor icms = "+ valorICMCompra);
+         //   MessageBox.Show("Valor valorICMCompra = " + valorICMCompra);
+          //  MessageBox.Show("Valor ICMSAntecipado = " + ICMSAntecipado);
             return Math.Round(ICMSAntecipado,2);
         }
     }
